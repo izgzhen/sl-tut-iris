@@ -11,13 +11,18 @@ clean: Makefile.coq
 Makefile.coq: _CoqProject Makefile
 	coq_makefile -f _CoqProject | sed 's/$$(COQCHK) $$(COQCHKFLAGS) $$(COQLIBS)/$$(COQCHK) $$(COQCHKFLAGS) $$(subst -Q,-R,$$(COQLIBS))/' > Makefile.coq
 
-iris-local: clean
+iris-local-init: clean
 	git submodule update --init iris
 	ln -nsf iris iris-enabled
+
+iris-local:
 	+make -C iris -f Makefile
 
-iris-system: clean
+iris-system-init: clean
 	rm -f iris-enabled
+
+iris-local-update:
+	git submodule update --remote --merge
 
 _CoqProject: ;
 

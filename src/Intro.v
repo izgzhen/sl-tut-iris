@@ -42,6 +42,8 @@ For first-time user, we recommend using the local version of Iris dependency. Th
     make
 
 If everything goes well, you can go through the following lines in ProofGeneral (emacs) or something other IDE.
+
+NOTE: Because Iris uses Unicode intensively, we recommand putting this in your emacs init file: https://gist.github.com/izgzhen/010d7dedaf44eb9fe60782b6d0c8d420, if you use PG.
 *)
 
 From iris.program_logic Require Export weakestpre.
@@ -57,7 +59,7 @@ From iris.heap_lang Require Import proofmode notation.
 Section proof.
   Context `{!heapG Σ}. (* Set up the heap context *)
 
-  Goal forall (P Q: iProp Σ), P ★ Q ⊢ Q ★ P.
+  Goal forall (P Q: iProp Σ), P ∗ Q ⊢ Q ∗ P.
   Proof.
     iIntros (P Q) "[HP HQ]".
     (**
