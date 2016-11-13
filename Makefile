@@ -15,14 +15,14 @@ iris-local-init: clean
 	git submodule update --init iris
 	ln -nsf iris iris-enabled
 
+iris-local-update:
+	git submodule update --remote --merge
+
 iris-local:
 	+make -C iris -f Makefile
 
 iris-system-init: clean
 	rm -f iris-enabled
-
-iris-local-update:
-	git submodule update --remote --merge
 
 _CoqProject: ;
 
@@ -30,4 +30,4 @@ Makefile: ;
 
 phony: ;
 
-.PHONY: all clean phony iris-local iris-system
+.PHONY: all clean phony iris-local iris-local-init iris-local-update iris-system
