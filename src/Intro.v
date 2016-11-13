@@ -34,9 +34,52 @@ it inside Coq.
 (** * Environment Setup *)
 (**
 
-First, fetch the source code of iris:
+To build Iris, we need Coq 8.5pl2 and ssreflect 1.6. For more information see https://gitlab.mpi-sws.org/FP/iris-coq. But don't install Iris yet!
 
-git submodule update
+For first-time user, we recommend using the local version of Iris dependency. Thus, you only need to do this in the root of this repo to build everything:
 
+    make iris-local
+    make
+
+If everything goes well, you can go through the following lines in ProofGeneral (emacs) or something other IDE.
 *)
+
+From iris.program_logic Require Export weakestpre.
+From iris.heap_lang Require Export lang.
+From iris.proofmode Require Import tactics.
+From iris.heap_lang Require Import proofmode notation.
+
+(** Don't be intimidated by this large set of imports!
+
+    Let's write a simple theorem: commutivity of separation conjunction (What is that? We will explain later).
+*)
+
+Section proof.
+  Context `{!heapG Σ}. (* Set up the heap context *)
+
+  Goal forall (P Q: iProp Σ), P ★ Q ⊢ Q ★ P.
+  Proof.
+    iIntros (P Q) "[HP HQ]".
+    (**
+
+  ...
+  =========================
+  ​​"HP" : P
+  ​"HQ" : Q
+  --------------------------------------★
+  Q ★ P
+
+    What does this context mean?
+
+    Before ====, it is Coq context, or "pure" context.
+    Between ==== and ---★, it is separation context, or "linear" context.
+    And after ---★, it is separation goal.
+
+     *)
+    iSplitL "HQ"; done.
+    (* Just like split ...
+       but you can only have "P" in either left or right branch!
+     *)
+  Qed.
+End proof.
 
