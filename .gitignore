@@ -8,6 +8,7 @@
 .\#*
 *~
 *.bak
-.coq-native/
 Makefile.coq
-html
+.coq-native/
+iris-enabled
+
