@@ -33,6 +33,18 @@ Section basics.
     iIntros (y xv yv) "[Hx Hy]".
     iSplitL "Hy"; done.
   Qed.
+
+  (** About ProofMode.
+
+As you may find by now, there are many "magical" things in proving things in Coq with Iris:
+
+- Two Contexts: Pure (Coq) context and Spatial (Iris) context
+- Specialized tactics: e.g. iExists, iIntros, iSplitL. You may infer their menaing by comparing them with the pure versions: exists, intros, and split.
+- Intensive notations: These notations makes Coq scripts more readable, but sometimes, (very rarely thanks to Robbert) important things about types are
+  hidden under these notations thus confusing newcomers a lot. You can use Set Printing Notations to observe this.
+
+ In fact, this magical thing is called ProofMode, and it greatly enhances the experience of proving stuff in Iris both in terms of autamation, readability, spatial context management etc. As said in the paper[?], it makes "reasoning in the embedded logic as seamless as reasoning in the meta logic of the proof assistant".
+   *)
   
 End basics.
 
