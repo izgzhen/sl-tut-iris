@@ -47,5 +47,66 @@ Let's prove a simple triple now.
     by iSplitR "Hl".
   Qed.
 
-(** * Weakest-pre Style *)
+  (** * Weakest-pre Style *)
 
+  (* Why we need WP-style spec?
+   
+   1. It is more primitive -- Hoare triple can be encoded with WP-style spec,
+      but not vice versa.
+   2. Weakest preconditions are better suited for interactive proving.
+      What you have in the context (including but not limited to "pre-condition")
+      is displayed in the context, now your target is too prove the after the
+      expression, the post-condition will hold. It is more natural than letting
+      a pre-condition hanging around. *)
+
+  Example wp_example: ∀ P: iProp Σ,
+      P ⊢ WP #1 {{ _, P }}.
+  Proof.
+    iIntros (P) "HP".
+    wp_value.
+    done.
+  Qed.
+
+  (* So, how can we write WP-spec for a library function? *)
+  Definition add_one : val :=
+    λ: "x", "x" <- !"x" + #1.
+
+  Lemma add_one_spec:
+    ∀ (x: loc) (n: Z) (Φ: val → iProp Σ),
+      heap_ctx ∗ x ↦ #n ∗ (x ↦ #(n + 1) -∗ Φ #())
+      ⊢ WP add_one #x {{ Φ }}.
+  Proof.
+    iIntros (x n Φ) "(#? & Hx & HΦ)".
+    rewrite /add_one.
+    wp_let. wp_load.
+    wp_op. wp_store.
+    by iApply "HΦ".
+  Qed.
+
+  Local Opaque add_one.
+
+  (* The Φ here means any post-condition: since it is
+universally qualified, we can always instantiate it with
+current context in the client side, and the productions before the
+wand will be introduced to the new context *)
+
+  Lemma add_one_client: ∀ (x y: loc),
+      heap_ctx ∗
+      x ↦ #1 ∗ y ↦ #2
+      ⊢ WP add_one #x;; add_one #y {{ _, x ↦ #2 ∗ y ↦ #3 }}.
+  Proof.
+    iIntros (x y) "(#? & Hx & Hy)".
+    wp_bind (add_one _).
+    iApply add_one_spec.
+    iFrame "#". (* Frame out the persistent context. *)
+    iFrame "Hx".
+    iIntros "Hx".
+    wp_seq.
+    iApply add_one_spec.
+    iFrame "#".
+    iFrame "Hy".
+    iIntros "Hy".
+    iSplitL "Hx"; done.
+  Qed.
+
+  
