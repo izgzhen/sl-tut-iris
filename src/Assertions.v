@@ -45,6 +45,43 @@ As you may find by now, there are many "magical" things in proving things in Coq
 
  In fact, this magical thing is called ProofMode, and it greatly enhances the experience of proving stuff in Iris both in terms of autamation, readability, spatial context management etc. As said in the paper[?], it makes "reasoning in the embedded logic as seamless as reasoning in the meta logic of the proof assistant".
    *)
+
+  (** So, where is an "empty heap"? *)
+  Example empty: True ∗ x ↦ #1 ⊢ x ↦ #1.
+  Proof.
+    iIntros "[_ Hx]". (* Note that we don't need the first conjunct -- since it is empty! *)
+    done.
+  Qed.
+
+  (** But, where does a spatial proposition mean? It is something which, if used, will be consumed. Consider this: *)
+
+  Example silly_pure: ∀ P: Prop, P → P ∧ P.
+  Proof.
+    intros P HP.
+    split; done.
+  Qed.
+
+  (* But you can't do the same for spatial "P": *)
+  Example silly_spatial: ∀ P: iProp Σ, P ⊢ P ∗ P.
+  Proof.
+    iIntros (P) "HP".
+    iSplitL "HP". (* You can only give P to either left side or right side. *)
+    - done.
+    - (* stuck *) Abort.
+
+  (* Finally, let's check out what does magic wand mean: *)
+  Lemma magic_wand: ∀ p1 p2 p3: iProp Σ, (p1 ⊢ p2 -∗ p3) ↔ (p1 ∗ p2 ⊢ p3).
+  Proof.
+    intros p1 p2 p3.
+    split.
+    - intros H.
+      iIntros "[HP1 HP2]".
+      iApply (H with "[HP1]")=>//.
+    - intros H.
+      iIntros "HP1 HP2". (* note this intro pattern (for wands) is different from separating conjunction *)
+      iApply H.
+      iSplitL "HP1"=>//.
+  Qed.
   
 End basics.
 
