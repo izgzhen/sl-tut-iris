@@ -82,6 +82,46 @@ As you may find by now, there are many "magical" things in proving things in Coq
       iApply H.
       iSplitL "HP1"=>//.
   Qed.
+
+  (** Now, let's try to use disjunction *)
+  Example disj_example: x ↦ #1 ⊢ x ↦ #2 ∨ x ↦ #1.
+  Proof.
+    iIntros "Hx".
+    iRight. (* Go to right *)
+    done.
+  Qed.
+
+  (** How to mix pure assertions with spatial ones ? *)
+  Example mix: ∀ y: loc, (x = y) ∗ y ↦ #1 ⊢ x ↦ #1.
+  Proof.
+    iIntros (y) "[% Hy]". (* Use % to introduce a (unfortunately anonymous) pure assertion *)
+    by subst. (* Note: by [tactic] is equal to [tactic; done.] *)
+  Qed.
+
+  (** Finally, let's prove those "derived rules" in 2.4 *)
+  Lemma derived1: ∀ P Q: iProp Σ,
+      Q ∗ (Q -∗ P) ⊢ P.
+  Proof.
+    iIntros (P Q) "[Q HQP]".
+    iApply ("HQP" with "Q").
+  Qed.
+
+  Lemma derived2: ∀ R Q: iProp Σ,
+      R ⊢ Q -∗ (Q ∗ R).
+  Proof.
+    iIntros (R Q) "HR HQ".
+    by iSplitL "HQ".
+  Qed.
+
+  Lemma derived3: ∀ P Q R: iProp Σ,
+      P ∗ R ⊢ P ∗ (Q -∗ (Q ∗ R)).
+  Proof.
+    iIntros (P Q R) "[HP HR]".
+    iSplitL "HP"; first done.
+    iIntros "HQ".
+    iSplitL "HQ"; done.
+  Qed.
+
   
 End basics.
 
