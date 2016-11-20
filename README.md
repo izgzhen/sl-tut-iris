@@ -10,7 +10,7 @@ Check out the text in `src/Intro.v`.
 
 * Basic
   - [x] Intro
-  - [ ] Assertions
+  - [x] Assertions
   - [ ] Specification
   - [ ] List and List Segments
   - [ ] Trees and Dags
@@ -18,9 +18,14 @@ Check out the text in `src/Intro.v`.
 * Advanced
   - [ ] Lock
 
-NOTE: we accept both "feature request" and "pull request" :)
+NOTE1: we accept both "feature request" and "pull request" :)
+NOTE2: ticked item only means "drafted".
 
 ## Related
 
 - [Iris](https://gitlab.mpi-sws.org/FP/iris-coq)
 - [Minicourse](http://www.cs.cmu.edu/afs/cs.cmu.edu/project/fox-19/member/jcr/www15818As2009/cs818A3-09.html)
+
+## Licensing
+
+All the code is licensed under MIT. Other content is licensed under CC-BY-NC-SA 2.0.
