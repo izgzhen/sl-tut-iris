@@ -12,7 +12,7 @@ Check out the text in `src/Intro.v`.
   - [x] Intro
   - [x] Assertions
   - [x] Specification
-  - [ ] List and List Segments
+  - [x] List and List Segments
   - [ ] Trees and Dags
   - [ ] Iterated Separating Conjunction
 * Advanced
