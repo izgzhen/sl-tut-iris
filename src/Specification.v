@@ -109,4 +109,7 @@ wand will be introduced to the new context *)
     iSplitL "Hx"; done.
   Qed.
 
-  
+  (** You can observe how the specification *generally* fit
+      in any specific client context *)
+
+End spec.

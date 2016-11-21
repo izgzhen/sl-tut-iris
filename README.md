@@ -11,7 +11,7 @@ Check out the text in `src/Intro.v`.
 * Basic
   - [x] Intro
   - [x] Assertions
-  - [ ] Specification
+  - [x] Specification
   - [ ] List and List Segments
   - [ ] Trees and Dags
   - [ ] Iterated Separating Conjunction
