@@ -2,3 +2,8 @@
 -Q iris-enabled iris
 src/Intro.v
 src/Assertions.v
+src/Specification.v
+src/List.v
+src/Tree.v
+src/Lock.v
+

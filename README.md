@@ -16,7 +16,7 @@ Check out the text in `src/Intro.v`.
   - [ ] Trees and Dags
   - [ ] Iterated Separating Conjunction
 * Advanced
-  - [ ] Lock
+  - [x] Lock
 
 NOTE1: we accept both "feature request" and "pull request" :)
 NOTE2: ticked item only means "drafted".
