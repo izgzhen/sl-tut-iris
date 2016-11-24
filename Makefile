@@ -1,6 +1,7 @@
 %: Makefile.coq phony
 	+@make -f Makefile.coq $@
 
+# Compile this project
 all: Makefile.coq
 	+@make -f Makefile.coq all
 
@@ -11,17 +12,14 @@ clean: Makefile.coq
 Makefile.coq: _CoqProject Makefile
 	coq_makefile -f _CoqProject | sed 's/$$(COQCHK) $$(COQCHKFLAGS) $$(COQLIBS)/$$(COQCHK) $$(COQCHKFLAGS) $$(subst -Q,-R,$$(COQLIBS))/' > Makefile.coq
 
-iris-local-init: clean
-	git submodule update --init iris
-	ln -nsf iris iris-enabled
-
-iris-local-update:
-	git submodule update --remote --merge
-
+# Use local Iris dependency
 iris-local:
-	+make -C iris -f Makefile
+	git submodule update --init iris # If not initialized, then initialize; If not updated with this remote, then update
+	ln -nsf iris iris-enabled # If not linked, then link
+	+make -C iris -f Makefile # If not built, then build
 
-iris-system-init: clean
+# Use system-installed Iris dependency
+iris-system: clean
 	rm -f iris-enabled
 
 _CoqProject: ;
@@ -30,4 +28,4 @@ Makefile: ;
 
 phony: ;
 
-.PHONY: all clean phony iris-local iris-local-init iris-local-update iris-system
+.PHONY: all clean phony iris-local iris-system

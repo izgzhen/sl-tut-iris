@@ -18,13 +18,18 @@ Check out the text in `src/Intro.v`.
 * Advanced
   - [x] Lock
 
-NOTE1: we accept both "feature request" and "pull request" :)
-NOTE2: ticked item only means "drafted".
+**NOTE1**: we accept both "feature request" and "pull request" :)
+
+**NOTE2**: ticked item only means "drafted".
 
 ## Related
 
 - [Iris](https://gitlab.mpi-sws.org/FP/iris-coq)
 - [Minicourse](http://www.cs.cmu.edu/afs/cs.cmu.edu/project/fox-19/member/jcr/www15818As2009/cs818A3-09.html)
+
+## How to update local dependency by tracking Iris `master`
+
+   git submodule update --remote
 
 ## Licensing
 
