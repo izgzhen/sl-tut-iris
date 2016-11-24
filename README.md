@@ -1,5 +1,7 @@
 # sl-tut-iris
 
+[![Build Status](https://travis-ci.org/izgzhen/sl-tut-iris.svg?branch=master)](https://travis-ci.org/izgzhen/sl-tut-iris)
+
 Source files for *Interactive Separation Logic Tutorial with Coq and Iris* (WIP, draft).
 
 ## How to start?
