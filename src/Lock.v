@@ -15,9 +15,12 @@ Let's start with the CAS-lock. The source is taken from Iris library
 intact, which best preserves its flavour.
 *)
 
+(** lock constructor: l ↦ #false means "unlocked", and vice versa *)
 Definition newlock : val := λ: <>, ref #false.
 
-(** CAS is an *atomic* operation: `CAS l old_val new_val` will atomically
+(** try_acquire: Try to acquire the lock and returns if the operation is successful.
+
+CAS is an *atomic* operation: `CAS l old_val new_val` will atomically
 compare the value at location l with old_val, if they are equal, then
 l will be updated to point to the new_val.
 
@@ -32,16 +35,17 @@ according to the protocol. *)
 Definition acquire : val :=
   rec: "acquire" "l" := if: try_acquire "l" then #() else "acquire" "l".
 
+(** release the lock *)
 Definition release : val := λ: "l", "l" <- #false.
 
 Global Opaque newlock try_acquire acquire release.
 
 (* From below until "proof" section is more intricate.
-   What it does, simply put, is just declare what kind of
+   What it does, simply put, is just declaring what kind of
    monoid and invariants we can use. It is like, imprecisely,
    preparing some equipments before hunting the bear.
 
-   So you can skip it for now if you are not familiar with theory behind Iris.
+   So you can skip it for now if you are not familiar with the theory behind Iris.
 *)
 
 (** The CMRA we need. *)
@@ -61,42 +65,40 @@ Section proof.
      kind of interference is a central topic of concurrency verification
      for many years.
      
-     Iris's way is a old trick -- invariants. It is something that every
-threads has to keep, if it ever needs to access the "shared resource"
+     Iris's way is a old trick -- invariants. It is some global assertion that every
+threads has to keep, if it ever wants to access the "shared resource"
 inside the invariants.
 
-Combined with invaraints, which is a global thing, is a local concept called
-"token". A token might not be the real resource, but a local thread can use
-token to do some "exchange", which will change the global states while keeping
-the invariants intact.
+Used together with invaraints (which is global) is a kind of assertion called
+"token". A token might not be the real resource, but a local thread can "exchange"
+token with other threads or the global invariants,
+which will change the while-machine state configuration.
 
 Let's take the following lock invariant for an example.
 This global invariant doesn't talk about the state of lock directy, rather, it
-separately consider two cases:
+separately considers two cases:
 
 1. If locked (b = true), then the global invariant doesn't keep anything (True).
    It means that some local thread has acquired the resource R, as well as an
-   *exclusive* token enforcing the property of lock that you can't lock twice (
-   or synonymly, acquiring the resource twice.
-2. If unlocked (b = false), then the global invariants *recycles* the resource as
+   *exclusive* token enforcing one property of lock: you can't lock twice (
+   or synonymly, acquiring the resource twice).
+2. If unlocked (b = false), then the global invariant *recycles* the resource as
    well as the unique token. At that moment, we can safely say that there is no
-   local thread holding that piece of resource.
-   *)
+   local thread holding that piece of resource. *)
 
   Definition lock_inv (γ : gname) (l : loc) (R : iProp Σ) : iProp Σ :=
     (∃ b : bool, l ↦ #b ∗ if b then True else own γ (Excl ()) ∗ R)%I.
 
-
-  (* is_lock wraps the invariant content inside an "inv" (see last conjunct,
+  (* Note that is_lock wraps the invariant content inside an "inv" (last conjunct),
 so any holder of the inv N P thing, can only access P atomically and invariably.
-You don't have to pay much attention to other conjuncts, but their meanings
+You don't have to pay much attention to the other conjuncts, though their meanings
 should be intuitive to see. *)
   Definition is_lock (γ : gname) (lk : val) (R : iProp Σ) : iProp Σ :=
     (∃ l: loc, heapN ⊥ N ∧ heap_ctx ∧ lk = #l ∧ inv N (lock_inv γ l R))%I.
 
   (* So, here is the abstract wrapper of "locked" token. In some sense,
-    owning a token can give your some knowledge ... (when token is not
-    a real resource -- or "ghost resource"? *)
+    owning a token can give your some knowledge about some global property.
+   Owning the "locked" token makes you know that no other threads own it. *)
   Definition locked (γ : gname): iProp Σ := own γ (Excl ()).
 
   (* Simple -- exclusivity of lock *)
