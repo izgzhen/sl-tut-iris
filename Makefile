@@ -11,6 +11,7 @@ clean: Makefile.coq
 
 Makefile.coq: _CoqProject Makefile
 	coq_makefile -f _CoqProject | sed 's/$$(COQCHK) $$(COQCHKFLAGS) $$(COQLIBS)/$$(COQCHK) $$(COQCHKFLAGS) $$(subst -Q,-R,$$(COQLIBS))/' > Makefile.coq
+	git apply Makefile.coq.diff
 
 # Use local Iris dependency
 iris-local:
