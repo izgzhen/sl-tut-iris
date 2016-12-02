@@ -1,4 +1,4 @@
-(** Introduction *)
+(** * Introduction *)
 
 (** * Separation Logic *)
 
@@ -11,7 +11,7 @@ It is still being studied, extended, and revised actively today.
 
 One of the best materials for studying this topic, as far as I see, is written by Reynolds himself:
 
-http://www.cs.cmu.edu/afs/cs.cmu.edu/project/fox-19/member/jcr/www15818As2009/cs818A3-09.html
+    http://www.cs.cmu.edu/afs/cs.cmu.edu/project/fox-19/member/jcr/www15818As2009/cs818A3-09.html
 
 Thus, I will try to organize the "beginner chapters" of this tutorial closely around the minicourse's notes.
 This means that I assume you will read the minicourse's handouts while going over the code here,
@@ -23,7 +23,7 @@ and I will also try to formalize all essential concepts & examples in the minico
 
 Iris is a higher-order concurrent separation logic developed by Ralf Jung et al. in recent years.
 One of the highlights is the simplicity of its logical foundation, dubbed "monoids and invariants are all your need!".
-Actually, even the separation logic itself is *encoded* with this small set of basic rules.
+Actually, even the separation logic itself is _encoded_ with this small set of basic rules.
 
 Despite the infinite possibilities of how to use Iris, we will focus on one of its instantiation -- heap-lang, a ML-like concurrent
 functional language. This language is expressive enough to write the most real world algorithms, and we can shallow-embed
@@ -34,7 +34,7 @@ it inside Coq.
 (** * Environment Setup *)
 (**
 
-To build Iris, we need Coq 8.5pl2 and ssreflect 1.6. For more information see https://gitlab.mpi-sws.org/FP/iris-coq. But don't install Iris yet!
+To build Iris, we need Coq 8.5pl2 and ssreflect 1.6. For more information see [https://gitlab.mpi-sws.org/FP/iris-coq]. But don't install Iris yet!
 
 For first-time user, we recommend using the local version of Iris dependency. Thus, you only need to do this in the root of this repo to build everything:
 
@@ -43,7 +43,7 @@ For first-time user, we recommend using the local version of Iris dependency. Th
 
 If everything goes well, you can go through the following lines in ProofGeneral (emacs) or something other IDE.
 
-NOTE: Because Iris uses Unicode intensively, we recommand putting this in your emacs init file: https://gist.github.com/izgzhen/010d7dedaf44eb9fe60782b6d0c8d420, if you use PG.
+NOTE: Because Iris uses Unicode intensively, we recommand putting this in your emacs init file: [https://gist.github.com/izgzhen/010d7dedaf44eb9fe60782b6d0c8d420], if you use PG.
 *)
 
 From iris.program_logic Require Export weakestpre.
@@ -62,7 +62,7 @@ Section proof.
   Goal forall (P Q: iProp Σ), P ∗ Q ⊢ Q ∗ P.
   Proof.
     iIntros (P Q) "[HP HQ]".
-    (**
+    (*
 
   ...
   =========================
