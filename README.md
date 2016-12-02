@@ -14,8 +14,8 @@ Check out the text in `src/Intro.v`.
   - [x] Intro
   - [x] Assertions
   - [x] Specification
-  - [x] List and List Segments
-  - [ ] Trees and Dags
+  - [x] List
+  - [ ] Tree
   - [ ] Iterated Separating Conjunction
 * Advanced
   - [x] Lock
