@@ -4,6 +4,8 @@
 
 Source files for *Interactive Separation Logic Tutorial with Coq and Iris* (WIP, draft).
 
+Homepage: http://blog.zhenzhang.me/sl-tut-iris/
+
 ## How to start?
 
 Check out the text in `src/Intro.v`.
@@ -15,7 +17,7 @@ Check out the text in `src/Intro.v`.
   - [x] Assertions
   - [x] Specification
   - [x] List
-  - [ ] Tree
+  - [x] Tree
   - [ ] Iterated Separating Conjunction
 * Advanced
   - [x] Lock
