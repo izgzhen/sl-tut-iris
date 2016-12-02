@@ -7,7 +7,7 @@ From iris.algebra Require Import excl.
 
 (**
 
-What Iris really features is its ability to reason about *concurrency*.
+What Iris really features is its ability to reason about _concurrency_.
 Actually, Iris is built to do this, and the separation logic is just part of
 its arsenal.
 
@@ -15,32 +15,33 @@ Let's start with the CAS-lock. The source is taken from Iris library
 intact, which best preserves its flavour.
 *)
 
-(** lock constructor: l ↦ #false means "unlocked", and vice versa *)
+(** lock constructor: [l ↦ #false] means "unlocked", and vice versa. *)
 Definition newlock : val := λ: <>, ref #false.
 
-(** try_acquire: Try to acquire the lock and returns if the operation is successful.
+(** [try_acquire]: Try to acquire the lock and returns if the operation is successful.
 
-CAS is an *atomic* operation: `CAS l old_val new_val` will atomically
-compare the value at location l with old_val, if they are equal, then
-l will be updated to point to the new_val.
+CAS is an _atomic_ operation: [CAS l old_val new_val] will atomically
+compare the value at location [l] with [old_val], if they are equal, then
+[l] will be updated to point to the [new_val].
 
-So what try_acquire is just a wrapper of such "try" semantics of any
+So what [try_acquire] is just a wrapper of such "try" semantics of any
 general lock-free operation.
 *)
 Definition try_acquire : val := λ: "l", CAS "l" #false #true.
 
-(* acquire will keep trying, until it can confirm that it update
-l from false to true. (and it will stay so until this thread "unlocks" it,
+(** [acquire] will keep trying, until it can confirm that it update
+[l] from false to true.
+and it will stay so until this thread "unlocks" it,
 according to the protocol. *)
 Definition acquire : val :=
   rec: "acquire" "l" := if: try_acquire "l" then #() else "acquire" "l".
 
-(** release the lock *)
+(** [release] the lock *)
 Definition release : val := λ: "l", "l" <- #false.
 
 Global Opaque newlock try_acquire acquire release.
 
-(* From below until "proof" section is more intricate.
+(** From below until "proof" section is more intricate.
    What it does, simply put, is just declaring what kind of
    monoid and invariants we can use. It is like, imprecisely,
    preparing some equipments before hunting the bear.
@@ -48,7 +49,7 @@ Global Opaque newlock try_acquire acquire release.
    So you can skip it for now if you are not familiar with the theory behind Iris.
 *)
 
-(** The CMRA we need. *)
+(* The CMRA we need. *)
 (* Not bundling heapG, as it may be shared with other users. *)
 Class lockG Σ := LockG { lock_tokG :> inG Σ (exclR unitC) }.
 Definition lockΣ : gFunctors := #[GFunctor (constRF (exclR unitC))].
@@ -59,7 +60,7 @@ Proof. intros [?%subG_inG _]%subG_inv. split; apply _. Qed.
 Section proof.
   Context `{!heapG Σ, !lockG Σ} (N : namespace).
 
-  (* Here is the invariant -- The KEY of proof.
+  (** Here is the invariant -- The KEY of proof.
      First, every thread, if it mutates some globally owned resource,
      it will interfere other threads. How to specify and control this
      kind of interference is a central topic of concurrency verification
@@ -78,30 +79,30 @@ Let's take the following lock invariant for an example.
 This global invariant doesn't talk about the state of lock directy, rather, it
 separately considers two cases:
 
-1. If locked (b = true), then the global invariant doesn't keep anything (True).
-   It means that some local thread has acquired the resource R, as well as an
-   *exclusive* token enforcing one property of lock: you can't lock twice (
+1. If locked ([b] = true), then the global invariant doesn't keep anything (True).
+   It means that some local thread has acquired the resource [R], as well as an
+   _exclusive_ token enforcing one property of lock: you can't lock twice (
    or synonymly, acquiring the resource twice).
-2. If unlocked (b = false), then the global invariant *recycles* the resource as
+2. If unlocked ([b] = false), then the global invariant _recycles_ the resource as
    well as the unique token. At that moment, we can safely say that there is no
    local thread holding that piece of resource. *)
 
   Definition lock_inv (γ : gname) (l : loc) (R : iProp Σ) : iProp Σ :=
     (∃ b : bool, l ↦ #b ∗ if b then True else own γ (Excl ()) ∗ R)%I.
 
-  (* Note that is_lock wraps the invariant content inside an "inv" (last conjunct),
-so any holder of the inv N P thing, can only access P atomically and invariably.
+  (** Note that [is_lock] wraps the invariant content inside an "inv" (last conjunct),
+so any holder of the [inv N P] thing, can only access [P] atomically and invariably.
 You don't have to pay much attention to the other conjuncts, though their meanings
 should be intuitive to see. *)
   Definition is_lock (γ : gname) (lk : val) (R : iProp Σ) : iProp Σ :=
     (∃ l: loc, heapN ⊥ N ∧ heap_ctx ∧ lk = #l ∧ inv N (lock_inv γ l R))%I.
 
-  (* So, here is the abstract wrapper of "locked" token. In some sense,
+  (** So, here is the abstract wrapper of "locked" token. In some sense,
     owning a token can give your some knowledge about some global property.
    Owning the "locked" token makes you know that no other threads own it. *)
   Definition locked (γ : gname): iProp Σ := own γ (Excl ()).
 
-  (* Simple -- exclusivity of lock *)
+  (** Simple -- exclusivity of lock *)
   Lemma locked_exclusive (γ : gname) : locked γ ∗ locked γ ⊢ False.
   Proof. rewrite /locked own_valid_2. by iIntros (?). Qed.
 
@@ -111,7 +112,7 @@ should be intuitive to see. *)
   Global Instance is_lock_ne n l : Proper (dist n ==> dist n) (is_lock γ l).
   Proof. solve_proper. Qed.
 
-  (** Some other properties of is_lock and locked. This is all about
+  (* Some other properties of is_lock and locked. This is all about
      modal logic, and we won't discuss this now.  *)
   Global Instance is_lock_persistent γ l R : PersistentP (is_lock γ l R).
   Proof. apply _. Qed.
@@ -119,7 +120,7 @@ should be intuitive to see. *)
   Proof. apply _. Qed.
 
   (** Finally ... here are the main proofs. We need a specification for
-      lock -- or more precisely, the operations associated with the *abstract*
+      lock -- or more precisely, the operations associated with the _abstract_
       cencept of "lock", i.e. these specs should be as abstract and general as
       possible (i.e. not exposing too much implementation details),
       while not sacrificing the usability.
@@ -129,8 +130,7 @@ implementation called ticket-lock should have exactly the same spec as this lock
 
 What is a spec? Narrowly speaking, a spec should be a interface for library
 functions. Type signatures can be viewed as a simple form of spec as well.
-What we are trying to prove here is just a more complex kind of spec.
-(spec of semantics )
+What we are trying to prove here is just a more complex kind of spec (spec of semantics).
 
 So, let's first checkout the spec for the lock constructor. *)
   
@@ -180,4 +180,5 @@ So, let's first checkout the spec for the lock constructor. *)
   Qed.
 End proof.
 
-(** ACK: This source is taken from Iris library *)
+(** Credit: This source is taken from Iris library. *)
+

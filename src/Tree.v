@@ -1,6 +1,6 @@
-(** Tree *)
+(** * Tree *)
 
-(* Credit: Iris library.
+(** Credit: Iris library.
 
 This is a continued example of recursive data structure in Iris, following the List.
 It also gives a more "useful" property and a function to specify with.
@@ -13,12 +13,12 @@ From iris.heap_lang Require Export lang.
 From iris.proofmode Require Export tactics.
 From iris.heap_lang Require Import proofmode notation.
 
-(** An inductive definition of binary tree with integers at leaves *)
+(** An inductive definition of binary tree with integers at leaves: *)
 Inductive tree :=
   | leaf : Z → tree
   | node : tree → tree → tree.
 
-(** Physical representation of a tree *)
+(** Physical representation of a tree: *)
 Fixpoint is_tree `{!heapG Σ} (v : val) (t : tree) : iProp Σ :=
   match t with
   | leaf n => v = InjLV #n
@@ -27,16 +27,16 @@ Fixpoint is_tree `{!heapG Σ} (v : val) (t : tree) : iProp Σ :=
        v = InjRV (#ll,#lr) ∗ ll ↦ vl ∗ is_tree vl tl ∗ lr ↦ vr ∗ is_tree vr tr
   end%I.
 
-(** "sum" property of the abstract tree *)
+(** "sum" property of the abstract tree: *)
 Fixpoint sum (t : tree) : Z :=
   match t with
   | leaf n => n
   | node tl tr => sum tl + sum tr
   end.
 
-(** Program that operates on a physical tree to calculate its sum property
+(** Program that operates on a physical tree to calculate its sum property.
 Note that it is a sequential computation so no synchronization or atomic
-operation is needed for the accumulating operation *)
+operation is needed for the accumulating operation. *)
 
 Definition sum_loop : val :=
   rec: "sum_loop" "t" "l" :=
@@ -64,7 +64,7 @@ Section proof.
     (* Löb induction to solve recursion. Note how forall selects
        variables to generalize. *)
     destruct t as [n'|tl tr]; simpl in *.
-    (* we consider two cases: t is the leaf or t is the branch *)
+    (* we consider two cases: [t] is the leaf node or [t] is the branch node *)
     - iDestruct "Ht" as "%"; subst.
       wp_match. wp_load. wp_op. wp_store.
       by iApply ("HΦ" with "Hl").

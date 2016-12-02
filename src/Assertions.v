@@ -34,7 +34,7 @@ Section basics.
     iSplitL "Hy"; done.
   Qed.
 
-  (** * About ProofMode:
+  (** * ProofMode
 
 As you may find by now, there are many "magical" things in proving things in Coq with Iris:
 
