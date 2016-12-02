@@ -1,5 +1,3 @@
-(** * Introduction *)
-
 (** * Separation Logic *)
 
 (**
