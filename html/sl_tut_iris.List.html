@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>sl_tut_iris.List</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library sl_tut_iris.List</h1>
+
+<div class="code">
+<span class="id" title="var">From</span> <span class="id" title="var">iris.program_logic</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">weakestpre</span> <span class="id" title="library">hoare</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.heap_lang</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">lang</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.proofmode</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">tactics</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.heap_lang</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">proofmode</span> <span class="id" title="library">notation</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <a name="list"><span class="id" title="section">list</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> `{!<span class="id" title="class">heapG</span> <span class="id" title="var">Σ</span>}. <span class="comment">(*&nbsp;Set&nbsp;up&nbsp;the&nbsp;heap&nbsp;context&nbsp;*)</span><br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab8"></a><h1 class="section">List</h1>
+
+<div class="paragraph"> </div>
+
+ In this chapter, we are studying data-structures that
+   <i>represent</i> an abstract concept of list/list-segment.
+It means that, we map the abstract list to our physical memory,
+and provide a set of operations whose spec is <i>abstract</i>. 
+<div class="paragraph"> </div>
+
+ Below is the abstract definition of list: Just using the Coq's
+standard list 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="List"><span class="id" title="definition">List</span></a> <span class="id" title="var">a</span> := <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="sl_tut_iris.List.html#a"><span class="id" title="variable">a</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Compared to the imperative &amp; low-level language, e.g. C,
+heap_lang is functional &amp; fairly high-level. It is intuitive that
+we will need to use option type and pair to model the classical lisp list (since
+<span class="inlinecode"><span class="id" title="var">heap_lang</span></span> can't define ADT conveniently now:
+
+<div class="paragraph"> </div>
+
+<pre>
+-- Haskell
+
+data List a = Cons { hd :: a, tl :: List a }
+            | Nil
+</pre>
+
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="nil"><span class="id" title="definition">nil</span></a> : <span class="id" title="inductive">val</span> := <span class="id" title="abbreviation">NONEV</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="cons"><span class="id" title="definition">cons</span></a> : <span class="id" title="inductive">val</span> := <span class="id" title="notation">λ</span><span class="id" title="notation">:</span> "x" "xl"<span class="id" title="notation">,</span> <span class="id" title="notation">ref</span> <span class="id" title="abbreviation">SOME</span> <span class="id" title="notation">(</span>"x"<span class="id" title="notation">,</span> "xl"<span class="id" title="notation">)</span>.<br/>
+
+<br/>
+<span class="comment">(*<br/>
+TODO:&nbsp;It&nbsp;might&nbsp;be&nbsp;clearer&nbsp;to&nbsp;draw&nbsp;a&nbsp;graph&nbsp;here,&nbsp;but&nbsp;I&nbsp;won't&nbsp;bother&nbsp;now&nbsp;:P<br/>
+*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Here&nbsp;is&nbsp;the&nbsp;"shape"&nbsp;predicate&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <a name="isList"><span class="id" title="definition">isList</span></a> (<span class="id" title="var">l</span>: <span class="id" title="inductive">val</span>) (<span class="id" title="var">xs</span>: <a class="idref" href="sl_tut_iris.List.html#List"><span class="id" title="definition">List</span></a> <span class="id" title="inductive">val</span>) : <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.List.html#a274842cb7112a12fd6939e42df3ef63"><span class="id" title="variable">Σ</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="sl_tut_iris.List.html#xs"><span class="id" title="variable">xs</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Lists.List.html#145bedf8a5d4a541831f3f70db03085c"><span class="id" title="notation">[]</span></a> ⇒ (<a class="idref" href="sl_tut_iris.List.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="notation">=</span> <span class="id" title="abbreviation">NONEV</span>)%<span class="id" title="var">I</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">x</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <span class="id" title="var">xs</span> ⇒ (<span class="id" title="notation">∃</span> <span class="id" title="notation">(</span><span class="id" title="var">hd</span>: <span class="id" title="definition">loc</span>) (<span class="id" title="var">tl</span>: <span class="id" title="inductive">val</span><span class="id" title="notation">),</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.List.html#hd"><span class="id" title="variable">hd</span></a> <span class="id" title="notation">=</span> <a class="idref" href="sl_tut_iris.List.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.List.html#hd"><span class="id" title="variable">hd</span></a> <span class="id" title="notation">↦</span> <span class="id" title="abbreviation">SOMEV</span> <span class="id" title="notation">(</span><span class="id" title="var">x</span><span class="id" title="notation">,</span> <a class="idref" href="sl_tut_iris.List.html#tl"><span class="id" title="variable">tl</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.List.html#isList"><span class="id" title="definition">isList</span></a> <a class="idref" href="sl_tut_iris.List.html#tl"><span class="id" title="variable">tl</span></a> <a class="idref" href="sl_tut_iris.List.html#xs"><span class="id" title="variable">xs</span></a>)%<span class="id" title="var">I</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This predicate, when applied with an abstract list, maps to
+its physical configuration. Now we can give spec for nil and cons.  
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="nil_spec"><span class="id" title="lemma">nil_spec</span></a>: <span class="id" title="notation">True</span> <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.List.html#isList"><span class="id" title="definition">isList</span></a> <a class="idref" href="sl_tut_iris.List.html#nil"><span class="id" title="definition">nil</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Lists.List.html#145bedf8a5d4a541831f3f70db03085c"><span class="id" title="notation">[]</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">rewrite</span> /<a class="idref" href="sl_tut_iris.List.html#nil"><span class="id" title="definition">nil</span></a>. <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="cons_spec"><span class="id" title="lemma">cons_spec</span></a> (<span class="id" title="var">l</span>: <span class="id" title="inductive">val</span>) (<span class="id" title="var">x</span>: <span class="id" title="inductive">val</span>) (<span class="id" title="var">xl</span>: <a class="idref" href="sl_tut_iris.List.html#List"><span class="id" title="definition">List</span></a> <span class="id" title="inductive">val</span>) : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <span class="id" title="var">Φ</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">,</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">heap_ctx</span> <span class="id" title="notation">∗</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="sl_tut_iris.List.html#isList"><span class="id" title="definition">isList</span></a> <a class="idref" href="sl_tut_iris.List.html#l"><span class="id" title="variable">l</span></a> <a class="idref" href="sl_tut_iris.List.html#xl"><span class="id" title="variable">xl</span></a> <span class="id" title="notation">∗</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">(</span><span class="id" title="notation">∀</span> <span class="id" title="var">l'</span>: <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <a class="idref" href="sl_tut_iris.List.html#isList"><span class="id" title="definition">isList</span></a> <a class="idref" href="sl_tut_iris.List.html#l'"><span class="id" title="variable">l'</span></a> (<a class="idref" href="sl_tut_iris.List.html#x"><span class="id" title="variable">x</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a><a class="idref" href="sl_tut_iris.List.html#xl"><span class="id" title="variable">xl</span></a>) <span class="id" title="notation">-∗</span> <a class="idref" href="sl_tut_iris.List.html#0a86c68449f31709b242a8cc62019df8"><span class="id" title="variable">Φ</span></a> <a class="idref" href="sl_tut_iris.List.html#l'"><span class="id" title="variable">l'</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">⊢</span> <span class="id" title="notation">WP</span> <a class="idref" href="sl_tut_iris.List.html#cons"><span class="id" title="definition">cons</span></a> <a class="idref" href="sl_tut_iris.List.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="sl_tut_iris.List.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="notation">{{</span> <a class="idref" href="sl_tut_iris.List.html#0a86c68449f31709b242a8cc62019df8"><span class="id" title="variable">Φ</span></a> <span class="id" title="notation">}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">Φ</span>) "(#? &amp; Hl &amp; HΦ)".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> /<a class="idref" href="sl_tut_iris.List.html#cons"><span class="id" title="definition">cons</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_let</span>. <span class="id" title="var">wp_let</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_alloc</span> <span class="id" title="var">l'</span> <span class="id" title="keyword">as</span> "Hl'".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iApply</span> "HΦ".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iExists</span> <span class="id" title="var">l'</span>, <span class="id" title="var">l</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="var">iFrame</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab9"></a><h1 class="section">List Segment</h1>
+
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <a name="isListSeg"><span class="id" title="definition">isListSeg</span></a> (<span class="id" title="var">m</span> <span class="id" title="var">n</span>: <span class="id" title="inductive">val</span>) (<span class="id" title="var">xs</span>: <a class="idref" href="sl_tut_iris.List.html#List"><span class="id" title="definition">List</span></a> <span class="id" title="inductive">val</span>) : <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.List.html#a274842cb7112a12fd6939e42df3ef63"><span class="id" title="variable">Σ</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="sl_tut_iris.List.html#xs"><span class="id" title="variable">xs</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Lists.List.html#145bedf8a5d4a541831f3f70db03085c"><span class="id" title="notation">[]</span></a> ⇒ (<a class="idref" href="sl_tut_iris.List.html#m"><span class="id" title="variable">m</span></a> <span class="id" title="notation">=</span> <a class="idref" href="sl_tut_iris.List.html#n"><span class="id" title="variable">n</span></a>)%<span class="id" title="var">I</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">x</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <span class="id" title="var">xs</span> ⇒ (<span class="id" title="notation">∃</span> <span class="id" title="notation">(</span><span class="id" title="var">hd</span>: <span class="id" title="definition">loc</span>) (<span class="id" title="var">m'</span>: <span class="id" title="inductive">val</span><span class="id" title="notation">),</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.List.html#hd"><span class="id" title="variable">hd</span></a> <span class="id" title="notation">=</span> <a class="idref" href="sl_tut_iris.List.html#m"><span class="id" title="variable">m</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.List.html#hd"><span class="id" title="variable">hd</span></a> <span class="id" title="notation">↦</span> <span class="id" title="abbreviation">SOMEV</span> <span class="id" title="notation">(</span><span class="id" title="var">x</span><span class="id" title="notation">,</span> <a class="idref" href="sl_tut_iris.List.html#m'"><span class="id" title="variable">m'</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.List.html#isListSeg"><span class="id" title="definition">isListSeg</span></a> <a class="idref" href="sl_tut_iris.List.html#m'"><span class="id" title="variable">m'</span></a> <a class="idref" href="sl_tut_iris.List.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="sl_tut_iris.List.html#xs"><span class="id" title="variable">xs</span></a>)%<span class="id" title="var">I</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+we will prove a trivial lemma first 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="list_seg_list"><span class="id" title="lemma">list_seg_list</span></a>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">(</span></a><span class="id" title="var">xl</span>: <a class="idref" href="sl_tut_iris.List.html#List"><span class="id" title="definition">List</span></a> <span class="id" title="inductive">val</span>) (<span class="id" title="var">l</span>: <span class="id" title="inductive">val</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">),</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="sl_tut_iris.List.html#isListSeg"><span class="id" title="definition">isListSeg</span></a> <a class="idref" href="sl_tut_iris.List.html#l"><span class="id" title="variable">l</span></a> <a class="idref" href="sl_tut_iris.List.html#nil"><span class="id" title="definition">nil</span></a> <a class="idref" href="sl_tut_iris.List.html#xl"><span class="id" title="variable">xl</span></a> <span class="id" title="notation">⊣⊢</span> <a class="idref" href="sl_tut_iris.List.html#isList"><span class="id" title="definition">isList</span></a> <a class="idref" href="sl_tut_iris.List.html#l"><span class="id" title="variable">l</span></a> <a class="idref" href="sl_tut_iris.List.html#xl"><span class="id" title="variable">xl</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">xl</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">x</span> <span class="id" title="var">xl'</span> <span class="id" title="var">IHxl'</span>]=&gt;//.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">l</span>. <span class="id" title="tactic">apply</span> <span class="id" title="lemma">uPred.equiv_spec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">iIntros</span> "Hls".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iDestruct</span> "Hls" <span class="id" title="keyword">as</span> (<span class="id" title="var">hd</span> <span class="id" title="var">m'</span>) "(% &amp; Hhd &amp; Htl)".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>. <span class="id" title="var">iExists</span> <span class="id" title="var">hd</span>, <span class="id" title="var">m'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iDestruct</span> <span class="id" title="notation">(</span><span class="id" title="var">IHxl'</span> <span class="id" title="var">m'</span> <span class="id" title="keyword">with</span> "Htl"<span class="id" title="notation">)</span> <span class="id" title="keyword">as</span> "Hm".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="var">iFrame</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">iIntros</span> "Hls".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iDestruct</span> "Hls" <span class="id" title="keyword">as</span> (<span class="id" title="var">hd</span> <span class="id" title="var">m'</span>) "(% &amp; Hhd &amp; Htl)".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iExists</span> <span class="id" title="var">hd</span>, <span class="id" title="var">m'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iDestruct</span> <span class="id" title="notation">(</span><span class="id" title="var">IHxl'</span> <span class="id" title="var">m'</span> <span class="id" title="keyword">with</span> "Htl"<span class="id" title="notation">)</span> <span class="id" title="keyword">as</span> "Hm".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="var">iFrame</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Look,&nbsp;two&nbsp;branches&nbsp;are&nbsp;exactly&nbsp;the&nbsp;same&nbsp;!&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="sl_tut_iris.List.html#list"><span class="id" title="section">list</span></a>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>sl_tut_iris.Lock</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library sl_tut_iris.Lock</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab11"></a><h1 class="section">Lock</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.program_logic</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">weakestpre</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.heap_lang</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">lang</span> <span class="id" title="library">proofmode</span> <span class="id" title="library">notation</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.proofmode</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">tactics</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.algebra</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">excl</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+What Iris really features is its ability to reason about <i>concurrency</i>.
+Actually, Iris is built to do this, and the separation logic is just part of
+its arsenal.
+
+<div class="paragraph"> </div>
+
+Let's start with the CAS-lock. The source is taken from Iris library
+intact, which best preserves its flavour.
+
+<div class="paragraph"> </div>
+
+ lock constructor: <span class="inlinecode"><a class="idref" href="sl_tut_iris.Specification.html#l"><span class="id" title="variable">l</span></a></span> <span class="inlinecode">↦</span> <span class="inlinecode">#<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a></span> means "unlocked", and vice versa. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="newlock"><span class="id" title="definition">newlock</span></a> : <span class="id" title="inductive">val</span> := <span class="id" title="notation">λ</span><span class="id" title="notation">:</span> <span class="id" title="notation">≠</span><span class="id" title="notation">,</span> <span class="id" title="notation">ref</span> <span class="id" title="notation">#</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><a class="idref" href="sl_tut_iris.Lock.html#try_acquire"><span class="id" title="definition">try_acquire</span></a></span>: Try to acquire the lock and returns if the operation is successful.
+
+<div class="paragraph"> </div>
+
+CAS is an <i>atomic</i> operation: <span class="inlinecode"><span class="id" title="constructor">CAS</span></span> <span class="inlinecode"><a class="idref" href="sl_tut_iris.Specification.html#l"><span class="id" title="variable">l</span></a></span> <span class="inlinecode"><span class="id" title="var">old_val</span></span> <span class="inlinecode"><span class="id" title="var">new_val</span></span> will atomically
+compare the value at location <span class="inlinecode"><a class="idref" href="sl_tut_iris.Specification.html#l"><span class="id" title="variable">l</span></a></span> with <span class="inlinecode"><span class="id" title="var">old_val</span></span>, if they are equal, then
+<span class="inlinecode"><a class="idref" href="sl_tut_iris.Specification.html#l"><span class="id" title="variable">l</span></a></span> will be updated to point to the <span class="inlinecode"><span class="id" title="var">new_val</span></span>.
+
+<div class="paragraph"> </div>
+
+So what <span class="inlinecode"><a class="idref" href="sl_tut_iris.Lock.html#try_acquire"><span class="id" title="definition">try_acquire</span></a></span> is just a wrapper of such "try" semantics of any
+general lock-free operation.
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="try_acquire"><span class="id" title="definition">try_acquire</span></a> : <span class="id" title="inductive">val</span> := <span class="id" title="notation">λ</span><span class="id" title="notation">:</span> "l"<span class="id" title="notation">,</span> <span class="id" title="constructor">CAS</span> "l" <span class="id" title="notation">#</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a> <span class="id" title="notation">#</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><a class="idref" href="sl_tut_iris.Lock.html#acquire"><span class="id" title="definition">acquire</span></a></span> will keep trying, until it can confirm that it update
+<span class="inlinecode"><a class="idref" href="sl_tut_iris.Specification.html#l"><span class="id" title="variable">l</span></a></span> from false to true.
+and it will stay so until this thread "unlocks" it,
+according to the protocol. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="acquire"><span class="id" title="definition">acquire</span></a> : <span class="id" title="inductive">val</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="notation">rec</span><span class="id" title="notation">:</span> "acquire" "l" <span class="id" title="notation">:=</span> <span class="id" title="keyword">if</span><span class="id" title="notation">:</span> <a class="idref" href="sl_tut_iris.Lock.html#try_acquire"><span class="id" title="definition">try_acquire</span></a> "l" <span class="id" title="keyword">then</span> <span class="id" title="notation">#</span><span class="id" title="notation">()</span> <span class="id" title="keyword">else</span> "acquire" "l".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><a class="idref" href="sl_tut_iris.Lock.html#release"><span class="id" title="definition">release</span></a></span> the lock 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="release"><span class="id" title="definition">release</span></a> : <span class="id" title="inductive">val</span> := <span class="id" title="notation">λ</span><span class="id" title="notation">:</span> "l"<span class="id" title="notation">,</span> "l" <span class="id" title="notation">&lt;-</span> <span class="id" title="notation">#</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Opaque</span> <a class="idref" href="sl_tut_iris.Lock.html#newlock"><span class="id" title="definition">newlock</span></a> <a class="idref" href="sl_tut_iris.Lock.html#try_acquire"><span class="id" title="definition">try_acquire</span></a> <a class="idref" href="sl_tut_iris.Lock.html#acquire"><span class="id" title="definition">acquire</span></a> <a class="idref" href="sl_tut_iris.Lock.html#release"><span class="id" title="definition">release</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+From below until "proof" section is more intricate.
+   What it does, simply put, is just declaring what kind of
+   monoid and invariants we can use. It is like, imprecisely,
+   preparing some equipments before hunting the bear.
+
+<div class="paragraph"> </div>
+
+   So you can skip it for now if you are not familiar with the theory behind Iris.
+
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;The&nbsp;CMRA&nbsp;we&nbsp;need.&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Not&nbsp;bundling&nbsp;heapG,&nbsp;as&nbsp;it&nbsp;may&nbsp;be&nbsp;shared&nbsp;with&nbsp;other&nbsp;users.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Class</span> <a name="lockG"><span class="id" title="record">lockG</span></a> <span class="id" title="var">Σ</span> := <a name="LockG"><span class="id" title="constructor">LockG</span></a> { <a name="lock_tokG"><span class="id" title="projection">lock_tokG</span></a> :&gt; <span class="id" title="class">inG</span> <a class="idref" href="sl_tut_iris.Lock.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a> (<span class="id" title="definition">exclR</span> <span class="id" title="definition">unitC</span>) }.<br/>
+<span class="id" title="keyword">Definition</span> <a name="feda9e16af511f6abf9f54ae03ecc40c"><span class="id" title="definition">lockΣ</span></a> : <span class="id" title="definition">gFunctors</span> := <span class="id" title="notation">#[</span><span class="id" title="constructor">GFunctor</span> (<span class="id" title="definition">constRF</span> (<span class="id" title="definition">exclR</span> <span class="id" title="definition">unitC</span>))<span class="id" title="notation">]</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <a name="9157780aa1a0f3413605d3305f217ead"><span class="id" title="instance">subG_lockΣ</span></a> {<span class="id" title="var">Σ</span>} : <span class="id" title="class">subG</span> <a class="idref" href="sl_tut_iris.Lock.html#feda9e16af511f6abf9f54ae03ecc40c"><span class="id" title="definition">lockΣ</span></a> <a class="idref" href="sl_tut_iris.Lock.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#513d6cdffacb0252f6c48bf325cd5180"><span class="id" title="notation">→</span></a> <a class="idref" href="sl_tut_iris.Lock.html#lockG"><span class="id" title="class">lockG</span></a> <a class="idref" href="sl_tut_iris.Lock.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intros</span> [?%<span class="id" title="lemma">subG_inG</span> <span class="id" title="var">_</span>]%<span class="id" title="lemma">subG_inv</span>. <span class="id" title="tactic">split</span>; <span class="id" title="tactic">apply</span> <span class="id" title="var">_</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <a name="proof"><span class="id" title="section">proof</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> `{!<span class="id" title="class">heapG</span> <span class="id" title="var">Σ</span>, !<a class="idref" href="sl_tut_iris.Lock.html#lockG"><span class="id" title="class">lockG</span></a> <a class="idref" href="sl_tut_iris.Lock.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>} (<span class="id" title="var">N</span> : <span class="id" title="definition">namespace</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Here is the invariant -- The KEY of proof.
+     First, every thread, if it mutates some globally owned resource,
+     it will interfere other threads. How to specify and control this
+     kind of interference is a central topic of concurrency verification
+     for many years.
+
+<div class="paragraph"> </div>
+
+     Iris's way is a old trick -- invariants. It is some global assertion that every
+threads has to keep, if it ever wants to access the "shared resource"
+inside the invariants.
+
+<div class="paragraph"> </div>
+
+Used together with invaraints (which is global) is a kind of assertion called
+"token". A token might not be the real resource, but a local thread can "exchange"
+token with other threads or the global invariants,
+which will change the while-machine state configuration.
+
+<div class="paragraph"> </div>
+
+Let's take the following lock invariant for an example.
+This global invariant doesn't talk about the state of lock directy, rather, it
+separately considers two cases:
+
+<div class="paragraph"> </div>
+
+1. If locked (<span class="inlinecode"><a class="idref" href="sl_tut_iris.Lock.html#b"><span class="id" title="variable">b</span></a></span> = true), then the global invariant doesn't keep anything (True).
+   It means that some local thread has acquired the resource <span class="inlinecode"><a class="idref" href="sl_tut_iris.Assertions.html#R"><span class="id" title="variable">R</span></a></span>, as well as an
+   <i>exclusive</i> token enforcing one property of lock: you can't lock twice (
+   or synonymly, acquiring the resource twice).
+2. If unlocked (<span class="inlinecode"><a class="idref" href="sl_tut_iris.Lock.html#b"><span class="id" title="variable">b</span></a></span> = false), then the global invariant <i>recycles</i> the resource as
+   well as the unique token. At that moment, we can safely say that there is no
+   local thread holding that piece of resource. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="lock_inv"><span class="id" title="definition">lock_inv</span></a> (<span class="id" title="var">γ</span> : <span class="id" title="definition">gname</span>) (<span class="id" title="var">l</span> : <span class="id" title="definition">loc</span>) (<span class="id" title="var">R</span> : <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Lock.html#6540b9899dd3d41c25dde7844fcd1e1c"><span class="id" title="variable">Σ</span></a>) : <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Lock.html#6540b9899dd3d41c25dde7844fcd1e1c"><span class="id" title="variable">Σ</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="notation">∃</span> <span class="id" title="var">b</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#bool"><span class="id" title="inductive">bool</span></a><span class="id" title="notation">,</span> <a class="idref" href="sl_tut_iris.Lock.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Lock.html#b"><span class="id" title="variable">b</span></a> <span class="id" title="notation">∗</span> <span class="id" title="keyword">if</span> <a class="idref" href="sl_tut_iris.Lock.html#b"><span class="id" title="variable">b</span></a> <span class="id" title="keyword">then</span> <span class="id" title="notation">True</span> <span class="id" title="keyword">else</span> <span class="id" title="definition">own</span> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> (<span class="id" title="constructor">Excl</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Program.Syntax.html#15d0087b74ef8a6bcc16368cb9a89942"><span class="id" title="notation">()</span></a>) <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Lock.html#R"><span class="id" title="variable">R</span></a>)%<span class="id" title="var">I</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Note that <span class="inlinecode"><a class="idref" href="sl_tut_iris.Lock.html#is_lock"><span class="id" title="definition">is_lock</span></a></span> wraps the invariant content inside an "inv" (last conjunct),
+so any holder of the <span class="inlinecode"><span class="id" title="definition">inv</span></span> <span class="inlinecode"><span class="id" title="var">N</span></span> <span class="inlinecode"><a class="idref" href="sl_tut_iris.Intro.html#P"><span class="id" title="variable">P</span></a></span> thing, can only access <span class="inlinecode"><a class="idref" href="sl_tut_iris.Intro.html#P"><span class="id" title="variable">P</span></a></span> atomically and invariably.
+You don't have to pay much attention to the other conjuncts, though their meanings
+should be intuitive to see. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="is_lock"><span class="id" title="definition">is_lock</span></a> (<span class="id" title="var">γ</span> : <span class="id" title="definition">gname</span>) (<span class="id" title="var">lk</span> : <span class="id" title="inductive">val</span>) (<span class="id" title="var">R</span> : <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Lock.html#6540b9899dd3d41c25dde7844fcd1e1c"><span class="id" title="variable">Σ</span></a>) : <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Lock.html#6540b9899dd3d41c25dde7844fcd1e1c"><span class="id" title="variable">Σ</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="notation">∃</span> <span class="id" title="var">l</span>: <span class="id" title="definition">loc</span><span class="id" title="notation">,</span> <span class="id" title="definition">heapN</span> <span class="id" title="notation">⊥</span> <a class="idref" href="sl_tut_iris.Lock.html#proof.N"><span class="id" title="variable">N</span></a> <span class="id" title="notation">∧</span> <span class="id" title="definition">heap_ctx</span> <span class="id" title="notation">∧</span> <a class="idref" href="sl_tut_iris.Lock.html#lk"><span class="id" title="variable">lk</span></a> <span class="id" title="notation">=</span> <span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Lock.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="notation">∧</span> <span class="id" title="definition">inv</span> <a class="idref" href="sl_tut_iris.Lock.html#proof.N"><span class="id" title="variable">N</span></a> (<a class="idref" href="sl_tut_iris.Lock.html#lock_inv"><span class="id" title="definition">lock_inv</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <a class="idref" href="sl_tut_iris.Lock.html#l"><span class="id" title="variable">l</span></a> <a class="idref" href="sl_tut_iris.Lock.html#R"><span class="id" title="variable">R</span></a>))%<span class="id" title="var">I</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+So, here is the abstract wrapper of "locked" token. In some sense,
+    owning a token can give your some knowledge about some global property.
+   Owning the "locked" token makes you know that no other threads own it. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="locked"><span class="id" title="definition">locked</span></a> (<span class="id" title="var">γ</span> : <span class="id" title="definition">gname</span>): <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Lock.html#6540b9899dd3d41c25dde7844fcd1e1c"><span class="id" title="variable">Σ</span></a> := <span class="id" title="definition">own</span> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> (<span class="id" title="constructor">Excl</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Program.Syntax.html#15d0087b74ef8a6bcc16368cb9a89942"><span class="id" title="notation">()</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Simple -- exclusivity of lock 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="locked_exclusive"><span class="id" title="lemma">locked_exclusive</span></a> (<span class="id" title="var">γ</span> : <span class="id" title="definition">gname</span>) : <a class="idref" href="sl_tut_iris.Lock.html#locked"><span class="id" title="definition">locked</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Lock.html#locked"><span class="id" title="definition">locked</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <span class="id" title="notation">⊢</span> <span class="id" title="notation">False</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">rewrite</span> /<a class="idref" href="sl_tut_iris.Lock.html#locked"><span class="id" title="definition">locked</span></a> <span class="id" title="lemma">own_valid_2</span>. <span class="id" title="tactic">by</span> <span class="id" title="var">iIntros</span> (?). <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;This&nbsp;is&nbsp;some&nbsp;thing&nbsp;about&nbsp;step-indexing.&nbsp;You&nbsp;can&nbsp;safely&nbsp;ignore&nbsp;them&nbsp;for&nbsp;now&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Global Instance</span> <a name="lock_inv_ne"><span class="id" title="instance">lock_inv_ne</span></a> <span class="id" title="var">n</span> <span class="id" title="var">γ</span> <span class="id" title="var">l</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Classes.Morphisms.html#Proper"><span class="id" title="class">Proper</span></a> (<span class="id" title="definition">dist</span> <a class="idref" href="sl_tut_iris.Lock.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Classes.Morphisms.html#5bcff5fca4c3a87e683dd8ca07bab63f"><span class="id" title="notation">==&gt;</span></a> <span class="id" title="definition">dist</span> <a class="idref" href="sl_tut_iris.Lock.html#n"><span class="id" title="variable">n</span></a>) (<a class="idref" href="sl_tut_iris.Lock.html#lock_inv"><span class="id" title="definition">lock_inv</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <a class="idref" href="sl_tut_iris.Lock.html#l"><span class="id" title="variable">l</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="var">solve_proper</span>. <span class="id" title="keyword">Qed</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Global Instance</span> <a name="is_lock_ne"><span class="id" title="instance">is_lock_ne</span></a> <span class="id" title="var">n</span> <span class="id" title="var">l</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Classes.Morphisms.html#Proper"><span class="id" title="class">Proper</span></a> (<span class="id" title="definition">dist</span> <a class="idref" href="sl_tut_iris.Lock.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Classes.Morphisms.html#5bcff5fca4c3a87e683dd8ca07bab63f"><span class="id" title="notation">==&gt;</span></a> <span class="id" title="definition">dist</span> <a class="idref" href="sl_tut_iris.Lock.html#n"><span class="id" title="variable">n</span></a>) (<a class="idref" href="sl_tut_iris.Lock.html#is_lock"><span class="id" title="definition">is_lock</span></a> <span class="id" title="var">γ</span> <a class="idref" href="sl_tut_iris.Lock.html#l"><span class="id" title="variable">l</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="var">solve_proper</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Some&nbsp;other&nbsp;properties&nbsp;of&nbsp;is_lock&nbsp;and&nbsp;locked.&nbsp;This&nbsp;is&nbsp;all&nbsp;about<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;modal&nbsp;logic,&nbsp;and&nbsp;we&nbsp;won't&nbsp;discuss&nbsp;this&nbsp;now.&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Global Instance</span> <a name="is_lock_persistent"><span class="id" title="instance">is_lock_persistent</span></a> <span class="id" title="var">γ</span> <span class="id" title="var">l</span> <span class="id" title="var">R</span> : <span class="id" title="class">PersistentP</span> (<a class="idref" href="sl_tut_iris.Lock.html#is_lock"><span class="id" title="definition">is_lock</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <a class="idref" href="sl_tut_iris.Lock.html#l"><span class="id" title="variable">l</span></a> <a class="idref" href="sl_tut_iris.Lock.html#R"><span class="id" title="variable">R</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">_</span>. <span class="id" title="keyword">Qed</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Global Instance</span> <a name="locked_timeless"><span class="id" title="instance">locked_timeless</span></a> <span class="id" title="var">γ</span> : <span class="id" title="class">TimelessP</span> (<a class="idref" href="sl_tut_iris.Lock.html#locked"><span class="id" title="definition">locked</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">_</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Finally ... here are the main proofs. We need a specification for
+      lock -- or more precisely, the operations associated with the <i>abstract</i>
+      cencept of "lock", i.e. these specs should be as abstract and general as
+      possible (i.e. not exposing too much implementation details),
+      while not sacrificing the usability.
+
+<div class="paragraph"> </div>
+
+     In fact, CAS-based spin-lock is just one way of implementing a lock. Another
+implementation called ticket-lock should have exactly the same spec as this lock.
+
+<div class="paragraph"> </div>
+
+What is a spec? Narrowly speaking, a spec should be a interface for library
+functions. Type signatures can be viewed as a simple form of spec as well.
+What we are trying to prove here is just a more complex kind of spec (spec of semantics).
+
+<div class="paragraph"> </div>
+
+So, let's first checkout the spec for the lock constructor. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="newlock_spec"><span class="id" title="lemma">newlock_spec</span></a> (<span class="id" title="var">R</span> : <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Lock.html#6540b9899dd3d41c25dde7844fcd1e1c"><span class="id" title="variable">Σ</span></a>):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">heapN</span> <span class="id" title="notation">⊥</span> <a class="idref" href="sl_tut_iris.Lock.html#proof.N"><span class="id" title="variable">N</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#513d6cdffacb0252f6c48bf325cd5180"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">{{{</span> <span class="id" title="definition">heap_ctx</span> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Lock.html#R"><span class="id" title="variable">R</span></a> <span class="id" title="notation">}}}</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="sl_tut_iris.Lock.html#newlock"><span class="id" title="definition">newlock</span></a> <span class="id" title="notation">#</span><span class="id" title="notation">()</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">{{{</span> <span class="id" title="var">lk</span> <span class="id" title="var">γ</span><span class="id" title="notation">,</span> <span class="id" title="notation">RET</span> <a class="idref" href="sl_tut_iris.Lock.html#lk"><span class="id" title="variable">lk</span></a><span class="id" title="notation">;</span> <a class="idref" href="sl_tut_iris.Lock.html#is_lock"><span class="id" title="definition">is_lock</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <a class="idref" href="sl_tut_iris.Lock.html#lk"><span class="id" title="variable">lk</span></a> <a class="idref" href="sl_tut_iris.Lock.html#R"><span class="id" title="variable">R</span></a> <span class="id" title="notation">}}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (? <span class="id" title="var">Φ</span>) "[#Hh HR] HΦ". <span class="id" title="tactic">rewrite</span> -<span class="id" title="lemma">wp_fupd</span> /<a class="idref" href="sl_tut_iris.Lock.html#newlock"><span class="id" title="definition">newlock</span></a> /=.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_seq</span>. <span class="id" title="var">wp_alloc</span> <span class="id" title="var">l</span> <span class="id" title="keyword">as</span> "Hl".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iMod</span> (<span class="id" title="lemma">own_alloc</span> (<span class="id" title="constructor">Excl</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Program.Syntax.html#15d0087b74ef8a6bcc16368cb9a89942"><span class="id" title="notation">()</span></a>)) <span class="id" title="keyword">as</span> (<span class="id" title="var">γ</span>) "Hγ"; <span class="id" title="tactic">first</span> <span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iMod</span> <span class="id" title="notation">(</span><span class="id" title="lemma">inv_alloc</span> <a class="idref" href="sl_tut_iris.Lock.html#proof.N"><span class="id" title="variable">N</span></a> <span class="id" title="var">_</span> (<a class="idref" href="sl_tut_iris.Lock.html#lock_inv"><span class="id" title="definition">lock_inv</span></a> <span class="id" title="var">γ</span> <span class="id" title="var">l</span> <span class="id" title="var">R</span>) <span class="id" title="keyword">with</span> "[-HΦ]"<span class="id" title="notation">)</span> <span class="id" title="keyword">as</span> "#?".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="var">iIntros</span> "!&gt;". <span class="id" title="var">iExists</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a>. <span class="id" title="tactic">by</span> <span class="id" title="var">iFrame</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iModIntro</span>. <span class="id" title="var">iApply</span> "HΦ". <span class="id" title="var">iExists</span> <span class="id" title="var">l</span>. <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="try_acquire_spec"><span class="id" title="lemma">try_acquire_spec</span></a> <span class="id" title="var">γ</span> <span class="id" title="var">lk</span> <span class="id" title="var">R</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">{{{</span> <a class="idref" href="sl_tut_iris.Lock.html#is_lock"><span class="id" title="definition">is_lock</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <a class="idref" href="sl_tut_iris.Lock.html#lk"><span class="id" title="variable">lk</span></a> <a class="idref" href="sl_tut_iris.Lock.html#R"><span class="id" title="variable">R</span></a> <span class="id" title="notation">}}}</span> <a class="idref" href="sl_tut_iris.Lock.html#try_acquire"><span class="id" title="definition">try_acquire</span></a> <a class="idref" href="sl_tut_iris.Lock.html#lk"><span class="id" title="variable">lk</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">{{{</span> <span class="id" title="var">b</span><span class="id" title="notation">,</span> <span class="id" title="notation">RET</span> <span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Lock.html#b"><span class="id" title="variable">b</span></a><span class="id" title="notation">;</span> <span class="id" title="keyword">if</span> <a class="idref" href="sl_tut_iris.Lock.html#b"><span class="id" title="variable">b</span></a> <span class="id" title="var">is</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> <span class="id" title="keyword">then</span> <a class="idref" href="sl_tut_iris.Lock.html#locked"><span class="id" title="definition">locked</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Lock.html#R"><span class="id" title="variable">R</span></a> <span class="id" title="keyword">else</span> <span class="id" title="notation">True</span> <span class="id" title="notation">}}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">Φ</span>) "#Hl HΦ". <span class="id" title="var">iDestruct</span> "Hl" <span class="id" title="keyword">as</span> (<span class="id" title="var">l</span>) "(% &amp; #? &amp; % &amp; #?)". <span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_rec</span>. <span class="id" title="var">iInv</span> <a class="idref" href="sl_tut_iris.Lock.html#proof.N"><span class="id" title="variable">N</span></a> <span class="id" title="keyword">as</span> ([]) "[Hl HR]" "Hclose".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">wp_cas_fail</span>. <span class="id" title="var">iMod</span> <span class="id" title="notation">(</span>"Hclose" <span class="id" title="keyword">with</span> "[Hl]"<span class="id" title="notation">)</span>; <span class="id" title="tactic">first</span> (<span class="id" title="var">iNext</span>; <span class="id" title="var">iExists</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a>; <span class="id" title="tactic">eauto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iModIntro</span>. <span class="id" title="var">iApply</span> <span class="id" title="notation">(</span>"HΦ" <span class="id" title="notation">$!</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a><span class="id" title="notation">)</span>. <span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">wp_cas_suc</span>. <span class="id" title="var">iDestruct</span> "HR" <span class="id" title="keyword">as</span> "[Hγ HR]".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iMod</span> <span class="id" title="notation">(</span>"Hclose" <span class="id" title="keyword">with</span> "[Hl]"<span class="id" title="notation">)</span>; <span class="id" title="tactic">first</span> (<span class="id" title="var">iNext</span>; <span class="id" title="var">iExists</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a>; <span class="id" title="tactic">eauto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iModIntro</span>. <span class="id" title="tactic">rewrite</span> /<a class="idref" href="sl_tut_iris.Lock.html#locked"><span class="id" title="definition">locked</span></a>. <span class="id" title="tactic">by</span> <span class="id" title="var">iApply</span> <span class="id" title="notation">(</span>"HΦ" <span class="id" title="notation">$!</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> <span class="id" title="keyword">with</span> "[$Hγ $HR]"<span class="id" title="notation">)</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="acquire_spec"><span class="id" title="lemma">acquire_spec</span></a> <span class="id" title="var">γ</span> <span class="id" title="var">lk</span> <span class="id" title="var">R</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">{{{</span> <a class="idref" href="sl_tut_iris.Lock.html#is_lock"><span class="id" title="definition">is_lock</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <a class="idref" href="sl_tut_iris.Lock.html#lk"><span class="id" title="variable">lk</span></a> <a class="idref" href="sl_tut_iris.Lock.html#R"><span class="id" title="variable">R</span></a> <span class="id" title="notation">}}}</span> <a class="idref" href="sl_tut_iris.Lock.html#acquire"><span class="id" title="definition">acquire</span></a> <a class="idref" href="sl_tut_iris.Lock.html#lk"><span class="id" title="variable">lk</span></a> <span class="id" title="notation">{{{</span> <span class="id" title="notation">RET</span> <span class="id" title="notation">#</span><span class="id" title="notation">()</span><span class="id" title="notation">;</span> <a class="idref" href="sl_tut_iris.Lock.html#locked"><span class="id" title="definition">locked</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Lock.html#R"><span class="id" title="variable">R</span></a> <span class="id" title="notation">}}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">Φ</span>) "#Hl HΦ". <span class="id" title="var">iLöb</span> <span class="id" title="keyword">as</span> "IH". <span class="id" title="var">wp_rec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_apply</span> <span class="id" title="notation">(</span><a class="idref" href="sl_tut_iris.Lock.html#try_acquire_spec"><span class="id" title="lemma">try_acquire_spec</span></a> <span class="id" title="keyword">with</span> "Hl"<span class="id" title="notation">)</span>. <span class="id" title="var">iIntros</span> ([]).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">iIntros</span> "[Hlked HR]". <span class="id" title="var">wp_if</span>. <span class="id" title="var">iApply</span> "HΦ"; <span class="id" title="var">iFrame</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">iIntros</span> "_". <span class="id" title="var">wp_if</span>. <span class="id" title="var">iApply</span> <span class="id" title="notation">(</span>"IH" <span class="id" title="keyword">with</span> "[HΦ]"<span class="id" title="notation">)</span>. <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="release_spec"><span class="id" title="lemma">release_spec</span></a> <span class="id" title="var">γ</span> <span class="id" title="var">lk</span> <span class="id" title="var">R</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">{{{</span> <a class="idref" href="sl_tut_iris.Lock.html#is_lock"><span class="id" title="definition">is_lock</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <a class="idref" href="sl_tut_iris.Lock.html#lk"><span class="id" title="variable">lk</span></a> <a class="idref" href="sl_tut_iris.Lock.html#R"><span class="id" title="variable">R</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Lock.html#locked"><span class="id" title="definition">locked</span></a> <a class="idref" href="sl_tut_iris.Lock.html#b0e5ed29efd576246de3282fa163293b"><span class="id" title="variable">γ</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Lock.html#R"><span class="id" title="variable">R</span></a> <span class="id" title="notation">}}}</span> <a class="idref" href="sl_tut_iris.Lock.html#release"><span class="id" title="definition">release</span></a> <a class="idref" href="sl_tut_iris.Lock.html#lk"><span class="id" title="variable">lk</span></a> <span class="id" title="notation">{{{</span> <span class="id" title="notation">RET</span> <span class="id" title="notation">#</span><span class="id" title="notation">()</span><span class="id" title="notation">;</span> <span class="id" title="notation">True</span> <span class="id" title="notation">}}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">Φ</span>) "(Hlock &amp; Hlocked &amp; HR) HΦ".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iDestruct</span> "Hlock" <span class="id" title="keyword">as</span> (<span class="id" title="var">l</span>) "(% &amp; #? &amp; % &amp; #?)". <span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> /<a class="idref" href="sl_tut_iris.Lock.html#release"><span class="id" title="definition">release</span></a> /=. <span class="id" title="var">wp_let</span>. <span class="id" title="var">iInv</span> <a class="idref" href="sl_tut_iris.Lock.html#proof.N"><span class="id" title="variable">N</span></a> <span class="id" title="keyword">as</span> (<span class="id" title="var">b</span>) "[Hl _]" "Hclose".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_store</span>. <span class="id" title="var">iApply</span> "HΦ". <span class="id" title="var">iApply</span> "Hclose". <span class="id" title="var">iNext</span>. <span class="id" title="var">iExists</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a>. <span class="id" title="tactic">by</span> <span class="id" title="var">iFrame</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="sl_tut_iris.Lock.html#proof"><span class="id" title="section">proof</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Credit: This source is taken from Iris library. 
+</div>
+<div class="code">
+
+<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

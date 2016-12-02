@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>sl_tut_iris.Specification</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library sl_tut_iris.Specification</h1>
+
+<div class="code">
+<span class="id" title="var">From</span> <span class="id" title="var">iris.program_logic</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">weakestpre</span> <span class="id" title="library">hoare</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.heap_lang</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">lang</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.proofmode</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">tactics</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.heap_lang</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">proofmode</span> <span class="id" title="library">notation</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <a name="spec"><span class="id" title="section">spec</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> `{!<span class="id" title="class">heapG</span> <span class="id" title="var">Σ</span>}. <span class="comment">(*&nbsp;Set&nbsp;up&nbsp;the&nbsp;heap&nbsp;context&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+<a name="lab6"></a><h1 class="section">Hoare Triples</h1>
+
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Hoare-triple&nbsp;is&nbsp;a&nbsp;classical&nbsp;way&nbsp;of&nbsp;expressing<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;partial&nbsp;correctness&nbsp;specificatin.<br/>
+<br/>
+Let's&nbsp;prove&nbsp;a&nbsp;simple&nbsp;triple&nbsp;now.<br/>
+&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="let_assignment"><span class="id" title="definition">let_assignment</span></a>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">{{</span> <span class="id" title="notation">True</span>%<span class="id" title="var">I</span> <span class="id" title="notation">}}</span> (<span class="id" title="keyword">let</span><span class="id" title="notation">:</span> "x" <span class="id" title="notation">:=</span> <span class="id" title="notation">#</span>1 <span class="id" title="keyword">in</span> "x")%<span class="id" title="var">E</span> <span class="id" title="notation">{{</span> <span class="id" title="var">r</span><span class="id" title="notation">,</span> (<span class="id" title="var">r</span> <span class="id" title="notation">=</span> <span class="id" title="notation">#</span>1)%<span class="id" title="var">I</span> <span class="id" title="notation">}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Note&nbsp;that&nbsp;the&nbsp;expression&nbsp;(or&nbsp;program,&nbsp;since&nbsp;heap_lang&nbsp;is&nbsp;a&nbsp;functional<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;language)&nbsp;is&nbsp;a&nbsp;shallow-embedding&nbsp;in&nbsp;Coq&nbsp;with&nbsp;heavy&nbsp;notations&nbsp;involved.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;You&nbsp;can&nbsp;just&nbsp;try&nbsp;to&nbsp;read&nbsp;it&nbsp;as&nbsp;a&nbsp;ML-like&nbsp;language.&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "!#".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;This&nbsp;is&nbsp;the&nbsp;weird&nbsp;thing&nbsp;...&nbsp;In&nbsp;Iris,&nbsp;hoare&nbsp;triple&nbsp;is&nbsp;just<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;syntactic&nbsp;sugar&nbsp;of&nbsp;weakest-pre&nbsp;style&nbsp;spec,&nbsp;which&nbsp;we&nbsp;will&nbsp;talk&nbsp;about&nbsp;later.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;So&nbsp;we&nbsp;need&nbsp;to&nbsp;use&nbsp;<span class="inlinecode">!#</span>&nbsp;pattern&nbsp;to&nbsp;eliminate&nbsp;the&nbsp;always&nbsp;modality.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;But&nbsp;current&nbsp;context&nbsp;should&nbsp;also&nbsp;look&nbsp;reasonable&nbsp;to&nbsp;you.&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "_".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Drop&nbsp;the&nbsp;useless&nbsp;True&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_let</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;evaluate&nbsp;the&nbsp;let&nbsp;expression&nbsp;--&nbsp;which&nbsp;does&nbsp;the&nbsp;substitution&nbsp;since<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="inlinecode">#1</span>&nbsp;is&nbsp;already&nbsp;in&nbsp;normal&nbsp;form&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The above expression is pretty pure, or put it another, <i>side-effect free</i>.
+      Let's check out a different one 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="allocation"><span class="id" title="definition">allocation</span></a>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">{{</span> <span class="id" title="definition">heap_ctx</span> <span class="id" title="notation">}}</span> (<span class="id" title="keyword">let</span><span class="id" title="notation">:</span> "x" <span class="id" title="notation">:=</span> <span class="id" title="notation">ref</span> <span class="id" title="notation">#</span>1 <span class="id" title="keyword">in</span> "x")%<span class="id" title="var">E</span> <span class="id" title="notation">{{</span> <span class="id" title="var">r</span><span class="id" title="notation">,</span> <span class="id" title="notation">∃</span> <span class="id" title="var">l</span>: <span class="id" title="definition">loc</span><span class="id" title="notation">,</span> <span class="id" title="var">r</span> <span class="id" title="notation">=</span> <span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Specification.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Specification.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>1 <span class="id" title="notation">}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "!# #?".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;<span class="inlinecode"><span class="id" title="var">heap_ctx</span></span>&nbsp;means&nbsp;we&nbsp;can&nbsp;allocate&nbsp;things&nbsp;in&nbsp;the&nbsp;heap.&nbsp;It&nbsp;is&nbsp;a<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;presistent&nbsp;assertions&nbsp;(duplicable&nbsp;but&nbsp;still&nbsp;spatial).&nbsp;So&nbsp;it&nbsp;is<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;introduced&nbsp;anonymously&nbsp;by&nbsp;pattern&nbsp;<span class="inlinecode">#?</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;You&nbsp;can&nbsp;also&nbsp;use&nbsp;<span class="inlinecode">#<span class="id" title="var">HeapCtx</span></span>&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_bind</span> (<span class="id" title="notation">ref</span> <span class="id" title="var">_</span>)%<span class="id" title="var">E</span>. <span class="comment">(*&nbsp;Focus&nbsp;on&nbsp;the&nbsp;expression&nbsp;to&nbsp;evaluate&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_alloc</span> <span class="id" title="var">l</span> <span class="id" title="keyword">as</span> "Hl". <span class="comment">(*&nbsp;allocate&nbsp;<span class="inlinecode"><span class="id" title="var">ref</span></span> <span class="inlinecode">#1</span>&nbsp;as&nbsp;in&nbsp;a&nbsp;cell&nbsp;pointed&nbsp;by&nbsp;<span class="inlinecode"><span class="id" title="var">l</span></span>&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;now&nbsp;<span class="inlinecode"><span class="id" title="var">l</span></span>&nbsp;has&nbsp;_full_&nbsp;ownership&nbsp;to&nbsp;a&nbsp;heap&nbsp;cell&nbsp;containing&nbsp;<span class="inlinecode">#1</span>&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_let</span>. <span class="id" title="var">iExists</span> <span class="id" title="var">l</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="var">iSplitR</span> "Hl".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab7"></a><h1 class="section">Weakest-pre Style</h1>
+
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Why&nbsp;we&nbsp;need&nbsp;WP-style&nbsp;spec?<br/>
+&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;1.&nbsp;It&nbsp;is&nbsp;more&nbsp;primitive&nbsp;--&nbsp;Hoare&nbsp;triple&nbsp;can&nbsp;be&nbsp;encoded&nbsp;with&nbsp;WP-style&nbsp;spec,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;not&nbsp;vice&nbsp;versa.<br/>
+&nbsp;&nbsp;&nbsp;2.&nbsp;Weakest&nbsp;preconditions&nbsp;are&nbsp;better&nbsp;suited&nbsp;for&nbsp;interactive&nbsp;proving.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;What&nbsp;you&nbsp;have&nbsp;in&nbsp;the&nbsp;context&nbsp;(including&nbsp;but&nbsp;not&nbsp;limited&nbsp;to&nbsp;"pre-condition")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;displayed&nbsp;in&nbsp;the&nbsp;context,&nbsp;now&nbsp;your&nbsp;target&nbsp;is&nbsp;too&nbsp;prove&nbsp;the&nbsp;after&nbsp;the<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expression,&nbsp;the&nbsp;post-condition&nbsp;will&nbsp;hold.&nbsp;It&nbsp;is&nbsp;more&nbsp;natural&nbsp;than&nbsp;letting<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;pre-condition&nbsp;hanging&nbsp;around.&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="wp_example"><span class="id" title="definition">wp_example</span></a>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <span class="id" title="var">P</span>: <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Specification.html#fd691a1eb8e2e5d8720093e5536d6f6f"><span class="id" title="variable">Σ</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">,</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="sl_tut_iris.Specification.html#P"><span class="id" title="variable">P</span></a> <span class="id" title="notation">⊢</span> <span class="id" title="notation">WP</span> <span class="id" title="notation">#</span>1 <span class="id" title="notation">{{</span> <span class="id" title="var">_</span><span class="id" title="notation">,</span> <a class="idref" href="sl_tut_iris.Specification.html#P"><span class="id" title="variable">P</span></a> <span class="id" title="notation">}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">P</span>) "HP".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_value</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;So,&nbsp;how&nbsp;can&nbsp;we&nbsp;write&nbsp;WP-spec&nbsp;for&nbsp;a&nbsp;library&nbsp;function?&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="add_one"><span class="id" title="definition">add_one</span></a> : <span class="id" title="inductive">val</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">λ</span><span class="id" title="notation">:</span> "x"<span class="id" title="notation">,</span> "x" <span class="id" title="notation">&lt;-</span> <span class="id" title="notation">!</span>"x" <span class="id" title="notation">+</span> <span class="id" title="notation">#</span>1.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="add_one_spec"><span class="id" title="lemma">add_one_spec</span></a>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">(</span></a><span class="id" title="var">x</span>: <span class="id" title="definition">loc</span>) (<span class="id" title="var">n</span>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>) (<span class="id" title="var">Φ</span>: <span class="id" title="inductive">val</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#513d6cdffacb0252f6c48bf325cd5180"><span class="id" title="notation">→</span></a> <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Specification.html#fd691a1eb8e2e5d8720093e5536d6f6f"><span class="id" title="variable">Σ</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">),</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">heap_ctx</span> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Specification.html#x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Specification.html#n"><span class="id" title="variable">n</span></a> <span class="id" title="notation">∗</span> <span class="id" title="notation">(</span><a class="idref" href="sl_tut_iris.Specification.html#x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#(</span><a class="idref" href="sl_tut_iris.Specification.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.ZArith.BinInt.html#a3448b794f7a26d611ad36492b5d640b"><span class="id" title="notation">+</span></a> 1<span class="id" title="notation">)</span> <span class="id" title="notation">-∗</span> <a class="idref" href="sl_tut_iris.Specification.html#0a86c68449f31709b242a8cc62019df8"><span class="id" title="variable">Φ</span></a> <span class="id" title="notation">#</span><span class="id" title="notation">()</span><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">⊢</span> <span class="id" title="notation">WP</span> <a class="idref" href="sl_tut_iris.Specification.html#add_one"><span class="id" title="definition">add_one</span></a> <span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Specification.html#x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">{{</span> <a class="idref" href="sl_tut_iris.Specification.html#0a86c68449f31709b242a8cc62019df8"><span class="id" title="variable">Φ</span></a> <span class="id" title="notation">}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">x</span> <span class="id" title="var">n</span> <span class="id" title="var">Φ</span>) "(#? &amp; Hx &amp; HΦ)".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> /<a class="idref" href="sl_tut_iris.Specification.html#add_one"><span class="id" title="definition">add_one</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_let</span>. <span class="id" title="var">wp_load</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_op</span>. <span class="id" title="var">wp_store</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="var">iApply</span> "HΦ".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Local Opaque</span> <a class="idref" href="sl_tut_iris.Specification.html#add_one"><span class="id" title="definition">add_one</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;The&nbsp;<span class="inlinecode"><span class="id" title="var">Φ</span></span>&nbsp;here&nbsp;means&nbsp;any&nbsp;post-condition:&nbsp;since&nbsp;it&nbsp;is<br/>
+universally&nbsp;qualified,&nbsp;we&nbsp;can&nbsp;always&nbsp;instantiate&nbsp;it&nbsp;with<br/>
+current&nbsp;context&nbsp;in&nbsp;the&nbsp;client&nbsp;side,&nbsp;and&nbsp;the&nbsp;productions&nbsp;before&nbsp;the<br/>
+wand&nbsp;will&nbsp;be&nbsp;introduced&nbsp;to&nbsp;the&nbsp;new&nbsp;context&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="add_one_client"><span class="id" title="lemma">add_one_client</span></a>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">(</span></a><span class="id" title="var">x</span> <span class="id" title="var">y</span>: <span class="id" title="definition">loc</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">),</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">heap_ctx</span> <span class="id" title="notation">∗</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="sl_tut_iris.Specification.html#x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>1 <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Specification.html#y"><span class="id" title="variable">y</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">⊢</span> <span class="id" title="notation">WP</span> <a class="idref" href="sl_tut_iris.Specification.html#add_one"><span class="id" title="definition">add_one</span></a> <span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Specification.html#x"><span class="id" title="variable">x</span></a><span class="id" title="notation">;;</span> <a class="idref" href="sl_tut_iris.Specification.html#add_one"><span class="id" title="definition">add_one</span></a> <span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Specification.html#y"><span class="id" title="variable">y</span></a> <span class="id" title="notation">{{</span> <span class="id" title="var">_</span><span class="id" title="notation">,</span> <a class="idref" href="sl_tut_iris.Specification.html#x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>2 <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Specification.html#y"><span class="id" title="variable">y</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>3 <span class="id" title="notation">}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">x</span> <span class="id" title="var">y</span>) "(#? &amp; Hx &amp; Hy)".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_bind</span> (<a class="idref" href="sl_tut_iris.Specification.html#add_one"><span class="id" title="definition">add_one</span></a> <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iApply</span> <a class="idref" href="sl_tut_iris.Specification.html#add_one_spec"><span class="id" title="lemma">add_one_spec</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iFrame</span> "#". <span class="comment">(*&nbsp;Frame&nbsp;out&nbsp;the&nbsp;persistent&nbsp;context.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iFrame</span> "Hx".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "Hx".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_seq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iApply</span> <a class="idref" href="sl_tut_iris.Specification.html#add_one_spec"><span class="id" title="lemma">add_one_spec</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iFrame</span> "#".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iFrame</span> "Hy".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "Hy".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iSplitL</span> "Hx"; <span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+You can observe how the specification <i>generally</i> fit
+      in any specific client context 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="sl_tut_iris.Specification.html#spec"><span class="id" title="section">spec</span></a>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

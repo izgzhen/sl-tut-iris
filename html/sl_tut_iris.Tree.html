@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>sl_tut_iris.Tree</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library sl_tut_iris.Tree</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab10"></a><h1 class="section">Tree</h1>
+
+<div class="paragraph"> </div>
+
+ Credit: Iris library.
+
+<div class="paragraph"> </div>
+
+This is a continued example of recursive data structure in Iris, following the List.
+It also gives a more "useful" property and a function to specify with.
+
+<div class="paragraph"> </div>
+
+However, note that this is still not related to concurrency yet.
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.program_logic</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">weakestpre</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.heap_lang</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">lang</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.proofmode</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">tactics</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.heap_lang</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">proofmode</span> <span class="id" title="library">notation</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+An inductive definition of binary tree with integers at leaves: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Inductive</span> <a name="tree"><span class="id" title="inductive">tree</span></a> :=<br/>
+&nbsp;&nbsp;| <a name="leaf"><span class="id" title="constructor">leaf</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#513d6cdffacb0252f6c48bf325cd5180"><span class="id" title="notation">→</span></a> <a class="idref" href="sl_tut_iris.Tree.html#tree"><span class="id" title="inductive">tree</span></a><br/>
+&nbsp;&nbsp;| <a name="node"><span class="id" title="constructor">node</span></a> : <a class="idref" href="sl_tut_iris.Tree.html#tree"><span class="id" title="inductive">tree</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#513d6cdffacb0252f6c48bf325cd5180"><span class="id" title="notation">→</span></a> <a class="idref" href="sl_tut_iris.Tree.html#tree"><span class="id" title="inductive">tree</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#513d6cdffacb0252f6c48bf325cd5180"><span class="id" title="notation">→</span></a> <a class="idref" href="sl_tut_iris.Tree.html#tree"><span class="id" title="inductive">tree</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Physical representation of a tree: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Fixpoint</span> <a name="is_tree"><span class="id" title="definition">is_tree</span></a> `{!<span class="id" title="class">heapG</span> <span class="id" title="var">Σ</span>} (<span class="id" title="var">v</span> : <span class="id" title="inductive">val</span>) (<span class="id" title="var">t</span> : <a class="idref" href="sl_tut_iris.Tree.html#tree"><span class="id" title="inductive">tree</span></a>) : <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Tree.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="sl_tut_iris.Tree.html#t"><span class="id" title="variable">t</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="sl_tut_iris.Tree.html#leaf"><span class="id" title="constructor">leaf</span></a> <span class="id" title="var">n</span> ⇒ <a class="idref" href="sl_tut_iris.Tree.html#v"><span class="id" title="variable">v</span></a> <span class="id" title="notation">=</span> <span class="id" title="constructor">InjLV</span> <span class="id" title="notation">#</span><span class="id" title="var">n</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="sl_tut_iris.Tree.html#node"><span class="id" title="constructor">node</span></a> <span class="id" title="var">tl</span> <span class="id" title="var">tr</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">∃</span> <span class="id" title="notation">(</span><span class="id" title="var">ll</span> <span class="id" title="var">lr</span> : <span class="id" title="definition">loc</span>) (<span class="id" title="var">vl</span> <span class="id" title="var">vr</span> : <span class="id" title="inductive">val</span><span class="id" title="notation">),</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="sl_tut_iris.Tree.html#v"><span class="id" title="variable">v</span></a> <span class="id" title="notation">=</span> <span class="id" title="constructor">InjRV</span> <span class="id" title="notation">(</span><span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Tree.html#ll"><span class="id" title="variable">ll</span></a><span class="id" title="notation">,</span><span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Tree.html#lr"><span class="id" title="variable">lr</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Tree.html#ll"><span class="id" title="variable">ll</span></a> <span class="id" title="notation">↦</span> <a class="idref" href="sl_tut_iris.Tree.html#vl"><span class="id" title="variable">vl</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Tree.html#is_tree"><span class="id" title="definition">is_tree</span></a> <a class="idref" href="sl_tut_iris.Tree.html#vl"><span class="id" title="variable">vl</span></a> <span class="id" title="var">tl</span> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Tree.html#lr"><span class="id" title="variable">lr</span></a> <span class="id" title="notation">↦</span> <a class="idref" href="sl_tut_iris.Tree.html#vr"><span class="id" title="variable">vr</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Tree.html#is_tree"><span class="id" title="definition">is_tree</span></a> <a class="idref" href="sl_tut_iris.Tree.html#vr"><span class="id" title="variable">vr</span></a> <span class="id" title="var">tr</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>%<span class="id" title="var">I</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+"sum" property of the abstract tree: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Fixpoint</span> <a name="sum"><span class="id" title="definition">sum</span></a> (<span class="id" title="var">t</span> : <a class="idref" href="sl_tut_iris.Tree.html#tree"><span class="id" title="inductive">tree</span></a>) : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="sl_tut_iris.Tree.html#t"><span class="id" title="variable">t</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="sl_tut_iris.Tree.html#leaf"><span class="id" title="constructor">leaf</span></a> <span class="id" title="var">n</span> ⇒ <span class="id" title="var">n</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="sl_tut_iris.Tree.html#node"><span class="id" title="constructor">node</span></a> <span class="id" title="var">tl</span> <span class="id" title="var">tr</span> ⇒ <a class="idref" href="sl_tut_iris.Tree.html#sum"><span class="id" title="definition">sum</span></a> <span class="id" title="var">tl</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.ZArith.BinInt.html#a3448b794f7a26d611ad36492b5d640b"><span class="id" title="notation">+</span></a> <a class="idref" href="sl_tut_iris.Tree.html#sum"><span class="id" title="definition">sum</span></a> <span class="id" title="var">tr</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Program that operates on a physical tree to calculate its sum property.
+Note that it is a sequential computation so no synchronization or atomic
+operation is needed for the accumulating operation. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="sum_loop"><span class="id" title="definition">sum_loop</span></a> : <span class="id" title="inductive">val</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="notation">rec</span><span class="id" title="notation">:</span> "sum_loop" "t" "l" <span class="id" title="notation">:=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span><span class="id" title="notation">:</span> "t" <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">InjL</span> "n" <span class="id" title="notation">⇒</span> "l" <span class="id" title="notation">&lt;-</span> "n" <span class="id" title="notation">+</span> <span class="id" title="notation">!</span>"l"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">|</span> <span class="id" title="notation">InjR</span> "tt" <span class="id" title="notation">⇒</span> "sum_loop" <span class="id" title="notation">!(</span><span class="id" title="constructor">Fst</span> "tt"<span class="id" title="notation">)</span> "l" <span class="id" title="notation">;;</span> "sum_loop" <span class="id" title="notation">!(</span><span class="id" title="constructor">Snd</span> "tt"<span class="id" title="notation">)</span> "l"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="sum'"><span class="id" title="definition">sum'</span></a> : <span class="id" title="inductive">val</span> := <span class="id" title="notation">λ</span><span class="id" title="notation">:</span> "t"<span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span><span class="id" title="notation">:</span> "l" <span class="id" title="notation">:=</span> <span class="id" title="notation">ref</span> <span class="id" title="notation">#</span>0 <span class="id" title="keyword">in</span><br/>
+&nbsp;&nbsp;<a class="idref" href="sl_tut_iris.Tree.html#sum_loop"><span class="id" title="definition">sum_loop</span></a> "t" "l"<span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">!</span>"l".<br/>
+
+<br/>
+<span class="id" title="keyword">Global Opaque</span> <a class="idref" href="sl_tut_iris.Tree.html#sum_loop"><span class="id" title="definition">sum_loop</span></a> <a class="idref" href="sl_tut_iris.Tree.html#sum'"><span class="id" title="definition">sum'</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <a name="proof"><span class="id" title="section">proof</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> `{!<span class="id" title="class">heapG</span> <span class="id" title="var">Σ</span>}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="sum_loop_wp"><span class="id" title="lemma">sum_loop_wp</span></a> <span class="id" title="var">v</span> <span class="id" title="var">t</span> <span class="id" title="var">l</span> (<span class="id" title="var">n</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>) (<span class="id" title="var">Φ</span> : <span class="id" title="inductive">val</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#513d6cdffacb0252f6c48bf325cd5180"><span class="id" title="notation">→</span></a> <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Tree.html#6540b9899dd3d41c25dde7844fcd1e1c"><span class="id" title="variable">Σ</span></a>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">heap_ctx</span> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Tree.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Tree.html#n"><span class="id" title="variable">n</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Tree.html#is_tree"><span class="id" title="definition">is_tree</span></a> <a class="idref" href="sl_tut_iris.Tree.html#v"><span class="id" title="variable">v</span></a> <a class="idref" href="sl_tut_iris.Tree.html#t"><span class="id" title="variable">t</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">∗</span> <span class="id" title="notation">(</span><a class="idref" href="sl_tut_iris.Tree.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#(</span><a class="idref" href="sl_tut_iris.Tree.html#sum"><span class="id" title="definition">sum</span></a> <a class="idref" href="sl_tut_iris.Tree.html#t"><span class="id" title="variable">t</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.ZArith.BinInt.html#a3448b794f7a26d611ad36492b5d640b"><span class="id" title="notation">+</span></a> <a class="idref" href="sl_tut_iris.Tree.html#n"><span class="id" title="variable">n</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">-∗</span> <a class="idref" href="sl_tut_iris.Tree.html#is_tree"><span class="id" title="definition">is_tree</span></a> <a class="idref" href="sl_tut_iris.Tree.html#v"><span class="id" title="variable">v</span></a> <a class="idref" href="sl_tut_iris.Tree.html#t"><span class="id" title="variable">t</span></a> <span class="id" title="notation">-∗</span> <a class="idref" href="sl_tut_iris.Tree.html#0a86c68449f31709b242a8cc62019df8"><span class="id" title="variable">Φ</span></a> <span class="id" title="notation">#</span><span class="id" title="notation">()</span><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">⊢</span> <span class="id" title="notation">WP</span> <a class="idref" href="sl_tut_iris.Tree.html#sum_loop"><span class="id" title="definition">sum_loop</span></a> <a class="idref" href="sl_tut_iris.Tree.html#v"><span class="id" title="variable">v</span></a> <span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Tree.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="notation">{{</span> <a class="idref" href="sl_tut_iris.Tree.html#0a86c68449f31709b242a8cc62019df8"><span class="id" title="variable">Φ</span></a> <span class="id" title="notation">}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "(#Hh &amp; Hl &amp; Ht &amp; HΦ)".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iLöb</span> <span class="id" title="keyword">as</span> "IH" <span class="id" title="keyword">∀</span> (<span class="id" title="var">v</span> <span class="id" title="var">t</span> <span class="id" title="var">l</span> <span class="id" title="var">n</span> <span class="id" title="var">Φ</span>). <span class="id" title="var">wp_rec</span>. <span class="id" title="var">wp_let</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Löb&nbsp;induction&nbsp;to&nbsp;solve&nbsp;recursion.&nbsp;Note&nbsp;how&nbsp;forall&nbsp;selects<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;variables&nbsp;to&nbsp;generalize.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">t</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">n'</span>|<span class="id" title="var">tl</span> <span class="id" title="var">tr</span>]; <span class="id" title="tactic">simpl</span> <span class="id" title="keyword">in</span> ×.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;we&nbsp;consider&nbsp;two&nbsp;cases:&nbsp;<span class="inlinecode"><span class="id" title="var">t</span></span>&nbsp;is&nbsp;the&nbsp;leaf&nbsp;node&nbsp;or&nbsp;<span class="inlinecode"><span class="id" title="var">t</span></span>&nbsp;is&nbsp;the&nbsp;branch&nbsp;node&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">iDestruct</span> "Ht" <span class="id" title="keyword">as</span> "%"; <span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_match</span>. <span class="id" title="var">wp_load</span>. <span class="id" title="var">wp_op</span>. <span class="id" title="var">wp_store</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="var">iApply</span> <span class="id" title="notation">(</span>"HΦ" <span class="id" title="keyword">with</span> "Hl"<span class="id" title="notation">)</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">iDestruct</span> "Ht" <span class="id" title="keyword">as</span> (<span class="id" title="var">ll</span> <span class="id" title="var">lr</span> <span class="id" title="var">vl</span> <span class="id" title="var">vr</span>) "(% &amp; Hll &amp; Htl &amp; Hlr &amp; Htr)"; <span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_match</span>. <span class="id" title="var">wp_proj</span>. <span class="id" title="var">wp_load</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_apply</span> <span class="id" title="notation">(</span>"IH" <span class="id" title="keyword">with</span> "Hl Htl"<span class="id" title="notation">)</span>. <span class="id" title="var">iIntros</span> "Hl Htl".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_seq</span>. <span class="id" title="var">wp_proj</span>. <span class="id" title="var">wp_load</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_apply</span> <span class="id" title="notation">(</span>"IH" <span class="id" title="keyword">with</span> "Hl Htr"<span class="id" title="notation">)</span>. <span class="id" title="var">iIntros</span> "Hl Htr".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iApply</span> <span class="id" title="notation">(</span>"HΦ" <span class="id" title="keyword">with</span> "[Hl]"<span class="id" title="notation">)</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">by</span> <span class="id" title="tactic">replace</span> (<a class="idref" href="sl_tut_iris.Tree.html#sum"><span class="id" title="definition">sum</span></a> <span class="id" title="var">tl</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.ZArith.BinInt.html#a3448b794f7a26d611ad36492b5d640b"><span class="id" title="notation">+</span></a> <a class="idref" href="sl_tut_iris.Tree.html#sum"><span class="id" title="definition">sum</span></a> <span class="id" title="var">tr</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.ZArith.BinInt.html#a3448b794f7a26d611ad36492b5d640b"><span class="id" title="notation">+</span></a> <span class="id" title="var">n</span>) <span class="id" title="keyword">with</span> (<a class="idref" href="sl_tut_iris.Tree.html#sum"><span class="id" title="definition">sum</span></a> <span class="id" title="var">tr</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.ZArith.BinInt.html#a3448b794f7a26d611ad36492b5d640b"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.ZArith.BinInt.html#a3448b794f7a26d611ad36492b5d640b"><span class="id" title="notation">(</span></a><a class="idref" href="sl_tut_iris.Tree.html#sum"><span class="id" title="definition">sum</span></a> <span class="id" title="var">tl</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.ZArith.BinInt.html#a3448b794f7a26d611ad36492b5d640b"><span class="id" title="notation">+</span></a> <span class="id" title="var">n</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.ZArith.BinInt.html#a3448b794f7a26d611ad36492b5d640b"><span class="id" title="notation">)</span></a>) <span class="id" title="tactic">by</span> <span class="id" title="tactic">omega</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iExists</span> <span class="id" title="var">ll</span>, <span class="id" title="var">lr</span>, <span class="id" title="var">vl</span>, <span class="id" title="var">vr</span>. <span class="id" title="tactic">by</span> <span class="id" title="var">iFrame</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="sum_wp"><span class="id" title="lemma">sum_wp</span></a> <span class="id" title="var">v</span> <span class="id" title="var">t</span> <span class="id" title="var">Φ</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">heap_ctx</span> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Tree.html#is_tree"><span class="id" title="definition">is_tree</span></a> <a class="idref" href="sl_tut_iris.Tree.html#v"><span class="id" title="variable">v</span></a> <a class="idref" href="sl_tut_iris.Tree.html#t"><span class="id" title="variable">t</span></a> <span class="id" title="notation">∗</span> <span class="id" title="notation">(</span><a class="idref" href="sl_tut_iris.Tree.html#is_tree"><span class="id" title="definition">is_tree</span></a> <a class="idref" href="sl_tut_iris.Tree.html#v"><span class="id" title="variable">v</span></a> <a class="idref" href="sl_tut_iris.Tree.html#t"><span class="id" title="variable">t</span></a> <span class="id" title="notation">-∗</span> <a class="idref" href="sl_tut_iris.Tree.html#0a86c68449f31709b242a8cc62019df8"><span class="id" title="variable">Φ</span></a> <span class="id" title="notation">#(</span><a class="idref" href="sl_tut_iris.Tree.html#sum"><span class="id" title="definition">sum</span></a> <a class="idref" href="sl_tut_iris.Tree.html#t"><span class="id" title="variable">t</span></a><span class="id" title="notation">)</span><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">⊢</span> <span class="id" title="notation">WP</span> <a class="idref" href="sl_tut_iris.Tree.html#sum'"><span class="id" title="definition">sum'</span></a> <a class="idref" href="sl_tut_iris.Tree.html#v"><span class="id" title="variable">v</span></a> <span class="id" title="notation">{{</span> <a class="idref" href="sl_tut_iris.Tree.html#0a86c68449f31709b242a8cc62019df8"><span class="id" title="variable">Φ</span></a> <span class="id" title="notation">}}</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "(#Hh &amp; Ht &amp; HΦ)". <span class="id" title="tactic">rewrite</span> /<a class="idref" href="sl_tut_iris.Tree.html#sum'"><span class="id" title="definition">sum'</span></a> /=.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_let</span>. <span class="id" title="var">wp_alloc</span> <span class="id" title="var">l</span> <span class="id" title="keyword">as</span> "Hl". <span class="id" title="var">wp_let</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wp_apply</span> <span class="id" title="notation">(</span><a class="idref" href="sl_tut_iris.Tree.html#sum_loop_wp"><span class="id" title="lemma">sum_loop_wp</span></a> <span class="id" title="keyword">with</span> "[- $Hh $Ht $Hl]"<span class="id" title="notation">)</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.ZArith.BinInt.html#Z.add_0_r"><span class="id" title="lemma">Z.add_0_r</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "Hl Ht". <span class="id" title="var">wp_seq</span>. <span class="id" title="var">wp_load</span>. <span class="id" title="tactic">by</span> <span class="id" title="var">iApply</span> "HΦ".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="sl_tut_iris.Tree.html#proof"><span class="id" title="section">proof</span></a>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

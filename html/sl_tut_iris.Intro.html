@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>sl_tut_iris.Intro</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library sl_tut_iris.Intro</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab1"></a><h1 class="section">Separation Logic</h1>
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+Separation logic is an extension of Hoare logic. We can use it to reason about program with "pointer" --
+a special type of value that serves as a reference to another value in memory.
+
+<div class="paragraph"> </div>
+
+Separation logic is developed by John C. Reynolds et al. at the start of this century.
+It is still being studied, extended, and revised actively today.
+
+<div class="paragraph"> </div>
+
+One of the best materials for studying this topic, as far as I see, is written by Reynolds himself:
+
+<div class="paragraph"> </div>
+
+    http://www.cs.cmu.edu/afs/cs.cmu.edu/project/fox-19/member/jcr/www15818As2009/cs818A3-09.html
+
+<div class="paragraph"> </div>
+
+Thus, I will try to organize the "beginner chapters" of this tutorial closely around the minicourse's notes.
+This means that I assume you will read the minicourse's handouts while going over the code here,
+and I will also try to formalize all essential concepts &amp; examples in the minicourse with Iris.
+
+<div class="paragraph"> </div>
+
+<a name="lab2"></a><h1 class="section">Iris</h1>
+
+<div class="paragraph"> </div>
+
+Iris is a higher-order concurrent separation logic developed by Ralf Jung et al. in recent years.
+One of the highlights is the simplicity of its logical foundation, dubbed "monoids and invariants are all your need!".
+Actually, even the separation logic itself is <i>encoded</i> with this small set of basic rules.
+
+<div class="paragraph"> </div>
+
+Despite the infinite possibilities of how to use Iris, we will focus on one of its instantiation -- heap-lang, a ML-like concurrent
+functional language. This language is expressive enough to write the most real world algorithms, and we can shallow-embed
+it inside Coq.
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<a name="lab3"></a><h1 class="section">Environment Setup</h1>
+
+<div class="paragraph"> </div>
+
+To build Iris, we need Coq 8.5pl2 and ssreflect 1.6. For more information see <span class="inlinecode"><span class="id" title="var">https</span>://<span class="id" title="var">gitlab.mpi</span>-<span class="id" title="var">sws.org</span>/<span class="id" title="var">FP</span>/<span class="id" title="var">iris</span>-<span class="id" title="var">coq</span></span>. But don't install Iris yet!
+
+<div class="paragraph"> </div>
+
+For first-time user, we recommend using the local version of Iris dependency. Thus, you only need to do this in the root of this repo to build everything:
+
+<div class="paragraph"> </div>
+
+    make iris-local
+    make
+
+<div class="paragraph"> </div>
+
+If everything goes well, you can go through the following lines in ProofGeneral (emacs) or something other IDE.
+
+<div class="paragraph"> </div>
+
+NOTE: Because Iris uses Unicode intensively, we recommand putting this in your emacs init file: <span class="inlinecode"><span class="id" title="var">https</span>://<span class="id" title="var">gist.github.com</span>/<span class="id" title="var">izgzhen</span>/010<span class="id" title="var">d7dedaf44eb9fe60782b6d0c8d420</span></span>, if you use PG.
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.program_logic</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">weakestpre</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.heap_lang</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">lang</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.proofmode</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">tactics</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.heap_lang</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">proofmode</span> <span class="id" title="library">notation</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Don't be intimidated by this large set of imports!
+
+<div class="paragraph"> </div>
+
+    Let's write a simple theorem: commutivity of separation conjunction (What is that? We will explain later).
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Section</span> <a name="proof"><span class="id" title="section">proof</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> `{!<span class="id" title="class">heapG</span> <span class="id" title="var">Σ</span>}. <span class="comment">(*&nbsp;Set&nbsp;up&nbsp;the&nbsp;heap&nbsp;context&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Goal</span> <span class="id" title="keyword">∀</span> (<span class="id" title="var">P</span> <span class="id" title="var">Q</span>: <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Intro.html#6540b9899dd3d41c25dde7844fcd1e1c"><span class="id" title="variable">Σ</span></a>), <a class="idref" href="sl_tut_iris.Intro.html#P"><span class="id" title="variable">P</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Intro.html#Q"><span class="id" title="variable">Q</span></a> <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.Intro.html#Q"><span class="id" title="variable">Q</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Intro.html#P"><span class="id" title="variable">P</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">P</span> <span class="id" title="var">Q</span>) "[HP HQ]".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*<br/>
+<br/>
+&nbsp;&nbsp;...<br/>
+&nbsp;&nbsp;=========================<br/>
+&nbsp;&nbsp;​​"HP"&nbsp;:&nbsp;P<br/>
+&nbsp;&nbsp;​"HQ"&nbsp;:&nbsp;Q<br/>
+&nbsp;&nbsp;--------------------------------------★<br/>
+&nbsp;&nbsp;Q&nbsp;★&nbsp;P<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;What&nbsp;does&nbsp;this&nbsp;context&nbsp;mean?<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Before&nbsp;====,&nbsp;it&nbsp;is&nbsp;Coq&nbsp;context,&nbsp;or&nbsp;"pure"&nbsp;context.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Between&nbsp;====&nbsp;and&nbsp;---★,&nbsp;it&nbsp;is&nbsp;separation&nbsp;context,&nbsp;or&nbsp;"linear"&nbsp;context.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;And&nbsp;after&nbsp;---★,&nbsp;it&nbsp;is&nbsp;separation&nbsp;goal.<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iSplitL</span> "HQ"; <span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Just&nbsp;like&nbsp;split&nbsp;...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;you&nbsp;can&nbsp;only&nbsp;have&nbsp;"P"&nbsp;in&nbsp;either&nbsp;left&nbsp;or&nbsp;right&nbsp;branch!<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="sl_tut_iris.Intro.html#proof"><span class="id" title="section">proof</span></a>.<br/>
+
+<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

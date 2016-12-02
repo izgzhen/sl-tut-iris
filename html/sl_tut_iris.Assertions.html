@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>sl_tut_iris.Assertions</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library sl_tut_iris.Assertions</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab4"></a><h1 class="section">Basics</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.program_logic</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">weakestpre</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.heap_lang</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="library">lang</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.proofmode</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">tactics</span>.<br/>
+<span class="id" title="var">From</span> <span class="id" title="var">iris.heap_lang</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">proofmode</span> <span class="id" title="library">notation</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <a name="basics"><span class="id" title="section">basics</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> `{!<span class="id" title="class">heapG</span> <span class="id" title="var">Σ</span>}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Let's start with a very simple assertion: 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Variable</span> <a name="basics.x"><span class="id" title="variable">x</span></a>: <span class="id" title="definition">loc</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="foo"><span class="id" title="definition">foo</span></a> : <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Assertions.html#58d97a07103ef63fa6484ded33e84a22"><span class="id" title="variable">Σ</span></a> := (<a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>1)%<span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;<span class="inlinecode">%<span class="id" title="var">I</span></span>&nbsp;is&nbsp;Iris&nbsp;scope,&nbsp;which&nbsp;types&nbsp;this&nbsp;expression&nbsp;as&nbsp;<span class="inlinecode"><span class="id" title="var">iProp</span></span> <span class="inlinecode"><span class="id" title="var">Σ</span></span>;&nbsp;<span class="inlinecode">#</span>&nbsp;is&nbsp;used&nbsp;to&nbsp;transfrom&nbsp;literal&nbsp;to&nbsp;a&nbsp;general&nbsp;value&nbsp;*)</span><br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A simple example: <span class="inlinecode"><a class="idref" href="sl_tut_iris.Assertions.html#foo"><span class="id" title="definition">foo</span></a></span> defines a singleton heap from <span class="inlinecode"><a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a></span> to <span class="inlinecode">1</span>,
+      which means that there is a singleton heap in which <span class="inlinecode"><a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a></span> points to integer literal 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="dummy"><span class="id" title="definition">dummy</span></a>: <a class="idref" href="sl_tut_iris.Assertions.html#foo"><span class="id" title="definition">foo</span></a> <span class="id" title="notation">⊢</span> <span class="id" title="notation">∃</span> <span class="id" title="var">n</span>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a><span class="id" title="notation">,</span> <a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span><a class="idref" href="sl_tut_iris.Assertions.html#n"><span class="id" title="variable">n</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "Hfoo".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="var">iExists</span> 1.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Note that the "entails" and "exists" are lifted from the pure logic to the Iris logic. 
+<div class="paragraph"> </div>
+
+ A more interesting lemma about commutivity of heap point-to: 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="comm_heap"><span class="id" title="lemma">comm_heap</span></a>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">(</span></a><span class="id" title="var">y</span>: <span class="id" title="definition">loc</span>) (<span class="id" title="var">xv</span> <span class="id" title="var">yv</span>: <span class="id" title="inductive">val</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">),</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <a class="idref" href="sl_tut_iris.Assertions.html#xv"><span class="id" title="variable">xv</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Assertions.html#y"><span class="id" title="variable">y</span></a> <span class="id" title="notation">↦</span> <a class="idref" href="sl_tut_iris.Assertions.html#yv"><span class="id" title="variable">yv</span></a> <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.Assertions.html#y"><span class="id" title="variable">y</span></a> <span class="id" title="notation">↦</span> <a class="idref" href="sl_tut_iris.Assertions.html#yv"><span class="id" title="variable">yv</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <a class="idref" href="sl_tut_iris.Assertions.html#xv"><span class="id" title="variable">xv</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">y</span> <span class="id" title="var">xv</span> <span class="id" title="var">yv</span>) "[Hx Hy]".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iSplitL</span> "Hy"; <span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab5"></a><h1 class="section">ProofMode</h1>
+
+
+<div class="paragraph"> </div>
+
+As you may find by now, there are many "magical" things in proving things in Coq with Iris:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> Two Contexts: Pure (Coq) context and Spatial (Iris) context
+
+</li>
+<li> Specialized tactics: e.g. <span class="inlinecode"><span class="id" title="var">iExists</span></span>, <span class="inlinecode"><span class="id" title="var">iIntros</span></span>, <span class="inlinecode"><span class="id" title="var">iSplitL</span></span>. You may infer their menaing by comparing them with the pure versions: <span class="inlinecode"><span class="id" title="tactic">∃</span></span>, <span class="inlinecode"><span class="id" title="tactic">intros</span></span>, and <span class="inlinecode"><span class="id" title="tactic">split</span></span>.
+
+</li>
+<li> Intensive notations: These notations makes Coq scripts more readable, but sometimes, (very rarely thanks to Robbert) important things about types are
+  hidden under these notations thus confusing newcomers a lot. You can use Set Printing Notations to observe this.
+
+</li>
+</ul>
+In fact, this magical thing is called ProofMode, and it greatly enhances the experience of proving stuff in Iris
+both in terms of autamation, readability, spatial context management etc.
+As said in the paper <i>Interactive Proofs in Higher-Order Concurrent Separation Logic</i>,
+it makes "reasoning in the embedded logic as seamless as reasoning in the meta logic of the proof assistant".
+   
+<div class="paragraph"> </div>
+
+ So, where is an "empty heap"? 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="empty"><span class="id" title="definition">empty</span></a>: <span class="id" title="notation">True</span> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>1 <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>1.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "[_ Hx]". <span class="comment">(*&nbsp;Note&nbsp;that&nbsp;we&nbsp;don't&nbsp;need&nbsp;the&nbsp;first&nbsp;conjunct&nbsp;--&nbsp;since&nbsp;it&nbsp;is&nbsp;empty!&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+But, where does a spatial proposition mean? It is something which, if used, will be consumed. Consider this: 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="silly_pure"><span class="id" title="definition">silly_pure</span></a>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <span class="id" title="var">P</span>: <span class="id" title="keyword">Prop</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">,</span></a> <a class="idref" href="sl_tut_iris.Assertions.html#P"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#513d6cdffacb0252f6c48bf325cd5180"><span class="id" title="notation">→</span></a> <a class="idref" href="sl_tut_iris.Assertions.html#P"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#71b04d61d6d756540f3712ec7919f1f1"><span class="id" title="notation">∧</span></a> <a class="idref" href="sl_tut_iris.Assertions.html#P"><span class="id" title="variable">P</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">P</span> <span class="id" title="var">HP</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;But&nbsp;you&nbsp;can't&nbsp;do&nbsp;the&nbsp;same&nbsp;for&nbsp;spatial&nbsp;"P":&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="silly_spatial"><span class="id" title="definition">silly_spatial</span></a>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <span class="id" title="var">P</span>: <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Assertions.html#58d97a07103ef63fa6484ded33e84a22"><span class="id" title="variable">Σ</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">,</span></a> <a class="idref" href="sl_tut_iris.Assertions.html#P"><span class="id" title="variable">P</span></a> <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.Assertions.html#P"><span class="id" title="variable">P</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Assertions.html#P"><span class="id" title="variable">P</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">P</span>) "HP".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iSplitL</span> "HP". <span class="comment">(*&nbsp;You&nbsp;can&nbsp;only&nbsp;give&nbsp;P&nbsp;to&nbsp;either&nbsp;left&nbsp;side&nbsp;or&nbsp;right&nbsp;side.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;stuck&nbsp;*)</span> <span class="id" title="keyword">Abort</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Finally,&nbsp;let's&nbsp;check&nbsp;out&nbsp;what&nbsp;does&nbsp;magic&nbsp;wand&nbsp;mean:&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="magic_wand"><span class="id" title="lemma">magic_wand</span></a>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <span class="id" title="var">p1</span> <span class="id" title="var">p2</span> <span class="id" title="var">p3</span>: <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Assertions.html#58d97a07103ef63fa6484ded33e84a22"><span class="id" title="variable">Σ</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">,</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#8e63abb578bfad2fb8d5724f6aadb648"><span class="id" title="notation">(</span></a><a class="idref" href="sl_tut_iris.Assertions.html#p1"><span class="id" title="variable">p1</span></a> <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.Assertions.html#p2"><span class="id" title="variable">p2</span></a> <span class="id" title="notation">-∗</span> <a class="idref" href="sl_tut_iris.Assertions.html#p3"><span class="id" title="variable">p3</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#8e63abb578bfad2fb8d5724f6aadb648"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#8e63abb578bfad2fb8d5724f6aadb648"><span class="id" title="notation">↔</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#8e63abb578bfad2fb8d5724f6aadb648"><span class="id" title="notation">(</span></a><a class="idref" href="sl_tut_iris.Assertions.html#p1"><span class="id" title="variable">p1</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Assertions.html#p2"><span class="id" title="variable">p2</span></a> <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.Assertions.html#p3"><span class="id" title="variable">p3</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#8e63abb578bfad2fb8d5724f6aadb648"><span class="id" title="notation">)</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">p1</span> <span class="id" title="var">p2</span> <span class="id" title="var">p3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "[HP1 HP2]".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iApply</span> <span class="id" title="notation">(</span><span class="id" title="var">H</span> <span class="id" title="keyword">with</span> "[HP1]"<span class="id" title="notation">)</span>=&gt;//.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "HP1 HP2". <span class="comment">(*&nbsp;note&nbsp;this&nbsp;intro&nbsp;pattern&nbsp;(for&nbsp;wands)&nbsp;is&nbsp;different&nbsp;from&nbsp;separating&nbsp;conjunction&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iApply</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iSplitL</span> "HP1"=&gt;//.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Now, let's try to use disjunction 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="disj_example"><span class="id" title="definition">disj_example</span></a>: <a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>1 <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>2 <span class="id" title="notation">∨</span> <a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>1.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "Hx".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iRight</span>. <span class="comment">(*&nbsp;Go&nbsp;to&nbsp;right&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+How to mix pure assertions with spatial ones ? 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="mix"><span class="id" title="definition">mix</span></a>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <span class="id" title="var">y</span>: <span class="id" title="definition">loc</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">,</span></a> <span class="id" title="notation">(</span><a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">=</span> <a class="idref" href="sl_tut_iris.Assertions.html#y"><span class="id" title="variable">y</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Assertions.html#y"><span class="id" title="variable">y</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>1 <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.Assertions.html#basics.x"><span class="id" title="variable">x</span></a> <span class="id" title="notation">↦</span> <span class="id" title="notation">#</span>1.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">y</span>) "[% Hy]". <span class="comment">(*&nbsp;Use&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="tactic">subst</span>. <span class="comment">(*&nbsp;Note:&nbsp;<span class="inlinecode"><span class="id" title="tactic">by</span></span> <span class="inlinecode">&lt;<span class="id" title="var">tactic</span>&gt;</span>&nbsp;is&nbsp;equal&nbsp;to&nbsp;<span class="inlinecode">&lt;<span class="id" title="var">tactic</span>&gt;;</span> <span class="inlinecode"><span class="id" title="var">done</span>.</span>&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Finally, let's prove those "derived rules" in 2.4 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="derived1"><span class="id" title="lemma">derived1</span></a>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <span class="id" title="var">P</span> <span class="id" title="var">Q</span>: <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Assertions.html#58d97a07103ef63fa6484ded33e84a22"><span class="id" title="variable">Σ</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">,</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="sl_tut_iris.Assertions.html#Q"><span class="id" title="variable">Q</span></a> <span class="id" title="notation">∗</span> <span class="id" title="notation">(</span><a class="idref" href="sl_tut_iris.Assertions.html#Q"><span class="id" title="variable">Q</span></a> <span class="id" title="notation">-∗</span> <a class="idref" href="sl_tut_iris.Assertions.html#P"><span class="id" title="variable">P</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.Assertions.html#P"><span class="id" title="variable">P</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">P</span> <span class="id" title="var">Q</span>) "[Q HQP]".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iApply</span> <span class="id" title="notation">(</span>"HQP" <span class="id" title="keyword">with</span> "Q"<span class="id" title="notation">)</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="derived2"><span class="id" title="lemma">derived2</span></a>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <span class="id" title="var">R</span> <span class="id" title="var">Q</span>: <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Assertions.html#58d97a07103ef63fa6484ded33e84a22"><span class="id" title="variable">Σ</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">,</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="sl_tut_iris.Assertions.html#R"><span class="id" title="variable">R</span></a> <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.Assertions.html#Q"><span class="id" title="variable">Q</span></a> <span class="id" title="notation">-∗</span> <span class="id" title="notation">(</span><a class="idref" href="sl_tut_iris.Assertions.html#Q"><span class="id" title="variable">Q</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Assertions.html#R"><span class="id" title="variable">R</span></a><span class="id" title="notation">)</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">R</span> <span class="id" title="var">Q</span>) "HR HQ".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="var">iSplitL</span> "HQ".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="derived3"><span class="id" title="lemma">derived3</span></a>: <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">∀</span></a> <span class="id" title="var">P</span> <span class="id" title="var">Q</span> <span class="id" title="var">R</span>: <span class="id" title="abbreviation">iProp</span> <a class="idref" href="sl_tut_iris.Assertions.html#58d97a07103ef63fa6484ded33e84a22"><span class="id" title="variable">Σ</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Unicode.Utf8_core.html#669c7d28e8f98524b0cbba08d17d0eec"><span class="id" title="notation">,</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="sl_tut_iris.Assertions.html#P"><span class="id" title="variable">P</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Assertions.html#R"><span class="id" title="variable">R</span></a> <span class="id" title="notation">⊢</span> <a class="idref" href="sl_tut_iris.Assertions.html#P"><span class="id" title="variable">P</span></a> <span class="id" title="notation">∗</span> <span class="id" title="notation">(</span><a class="idref" href="sl_tut_iris.Assertions.html#Q"><span class="id" title="variable">Q</span></a> <span class="id" title="notation">-∗</span> <span class="id" title="notation">(</span><a class="idref" href="sl_tut_iris.Assertions.html#Q"><span class="id" title="variable">Q</span></a> <span class="id" title="notation">∗</span> <a class="idref" href="sl_tut_iris.Assertions.html#R"><span class="id" title="variable">R</span></a><span class="id" title="notation">)</span><span class="id" title="notation">)</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> (<span class="id" title="var">P</span> <span class="id" title="var">Q</span> <span class="id" title="var">R</span>) "[HP HR]".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iSplitL</span> "HP"; <span class="id" title="tactic">first</span> <span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iIntros</span> "HQ".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">iSplitL</span> "HQ"; <span class="id" title="var">done</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="sl_tut_iris.Assertions.html#basics"><span class="id" title="section">basics</span></a>.<br/>
+
+<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>
