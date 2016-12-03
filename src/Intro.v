@@ -1,19 +1,23 @@
 (** * Separation Logic *)
 
-(**
-Separation logic is an extension of Hoare logic. We can use it to reason about program with "pointer" --
-a special type of value that serves as a reference to another value in memory.
+(** Separation logic is an extension of Hoare logic. We can use it to reason
+    about program with "pointer" -- a special type of value that serves as a
+    reference to another value in memory.
 
-Separation logic is developed by John C. Reynolds et al. at the start of this century.
-It is still being studied, extended, and revised actively today.
+    Separation logic is developed by John C. Reynolds et al. at the start
+    of this century. It is still being studied, extended, and revised
+    actively today.
 
-One of the best materials for studying this topic, as far as I see, is written by Reynolds himself:
+    One of the best materials for studying this topic, as far as I see,
+    is written by Reynolds himself:
 
-    http://www.cs.cmu.edu/afs/cs.cmu.edu/project/fox-19/member/jcr/www15818As2009/cs818A3-09.html
+    #<a href="http://www.cs.cmu.edu/afs/cs.cmu.edu/project/fox-19/member/jcr/www15818As2009/cs818A3-09.html">http://www.cs.cmu.edu/afs/cs.cmu.edu/project/fox-19/member/jcr/www15818As2009/cs818A3-09.html</a>#
 
-Thus, I will try to organize the "beginner chapters" of this tutorial closely around the minicourse's notes.
-This means that I assume you will read the minicourse's handouts while going over the code here,
-and I will also try to formalize all essential concepts & examples in the minicourse with Iris.
+    Thus, I will try to organize the "beginner chapters" of this tutorial
+    closely around the minicourse's notes. This means that I assume you
+    will read the minicourse's handouts while going over the code here,
+    and I will also try to formalize all essential concepts & examples
+    in the minicourse with Iris.
 *)
 
 (** * Iris *)
@@ -36,12 +40,14 @@ To build Iris, we need Coq 8.5pl2 and ssreflect 1.6. For more information see [h
 
 For first-time user, we recommend using the local version of Iris dependency. Thus, you only need to do this in the root of this repo to build everything:
 
+<<
     make iris-local
     make
+>>
 
 If everything goes well, you can go through the following lines in ProofGeneral (emacs) or something other IDE.
 
-NOTE: Because Iris uses Unicode intensively, we recommand putting this in your emacs init file: [https://gist.github.com/izgzhen/010d7dedaf44eb9fe60782b6d0c8d420], if you use PG.
+NOTE: Because Iris uses Unicode intensively, we recommand putting this in your emacs init file: #<a href="https://gist.github.com/izgzhen/010d7dedaf44eb9fe60782b6d0c8d420">https://gist.github.com/izgzhen/010d7dedaf44eb9fe60782b6d0c8d420</a>#, if you use PG.
 *)
 
 From iris.program_logic Require Export weakestpre.
