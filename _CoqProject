@@ -1,5 +1,5 @@
 -Q src sl_tut_iris
--Q iris-enabled iris
+-Q iris-enabled/theories iris
 src/Intro.v
 src/Assertions.v
 src/Specification.v

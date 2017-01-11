@@ -1,9 +1,12 @@
 (** * Lock *)
 
 From iris.program_logic Require Export weakestpre.
-From iris.heap_lang Require Export lang proofmode notation.
+From iris.heap_lang Require Export lang.
 From iris.proofmode Require Import tactics.
+From iris.heap_lang Require Import proofmode notation.
 From iris.algebra Require Import excl.
+From iris.heap_lang.lib Require Import lock.
+Set Default Proof Using "Type".
 
 (**
 
@@ -38,8 +41,6 @@ Definition acquire : val :=
 
 (** [release] the lock *)
 Definition release : val := λ: "l", "l" <- #false.
-
-Global Opaque newlock try_acquire acquire release.
 
 (** From below until "proof" section is more intricate.
    What it does, simply put, is just declaring what kind of
@@ -95,7 +96,7 @@ so any holder of the [inv N P] thing, can only access [P] atomically and invaria
 You don't have to pay much attention to the other conjuncts, though their meanings
 should be intuitive to see. *)
   Definition is_lock (γ : gname) (lk : val) (R : iProp Σ) : iProp Σ :=
-    (∃ l: loc, heapN ⊥ N ∧ heap_ctx ∧ lk = #l ∧ inv N (lock_inv γ l R))%I.
+    (∃ l: loc, ⌜lk = #l⌝ ∧ inv N (lock_inv γ l R))%I.
 
   (** So, here is the abstract wrapper of "locked" token. In some sense,
     owning a token can give your some knowledge about some global property.
@@ -103,8 +104,8 @@ should be intuitive to see. *)
   Definition locked (γ : gname): iProp Σ := own γ (Excl ()).
 
   (** Simple -- exclusivity of lock *)
-  Lemma locked_exclusive (γ : gname) : locked γ ∗ locked γ ⊢ False.
-  Proof. rewrite /locked own_valid_2. by iIntros (?). Qed.
+  Lemma locked_exclusive (γ : gname) : locked γ -∗ locked γ -∗ False.
+  Proof. iIntros "H1 H2". by iDestruct (own_valid_2 with "H1 H2") as %?. Qed.
 
   (* This is some thing about step-indexing. You can safely ignore them for now *)
   Global Instance lock_inv_ne n γ l : Proper (dist n ==> dist n) (lock_inv γ l).
@@ -135,12 +136,11 @@ What we are trying to prove here is just a more complex kind of spec (spec of se
 So, let's first checkout the spec for the lock constructor. *)
   
   Lemma newlock_spec (R : iProp Σ):
-    heapN ⊥ N →
-    {{{ heap_ctx ∗ R }}}
+    {{{ R }}}
       newlock #()
     {{{ lk γ, RET lk; is_lock γ lk R }}}.
   Proof.
-    iIntros (? Φ) "[#Hh HR] HΦ". rewrite -wp_fupd /newlock /=.
+    iIntros (Φ) "HR HΦ". rewrite -wp_fupd /newlock /=.
     wp_seq. wp_alloc l as "Hl".
     iMod (own_alloc (Excl ())) as (γ) "Hγ"; first done.
     iMod (inv_alloc N _ (lock_inv γ l R) with "[-HΦ]") as "#?".
@@ -152,7 +152,7 @@ So, let's first checkout the spec for the lock constructor. *)
     {{{ is_lock γ lk R }}} try_acquire lk
     {{{ b, RET #b; if b is true then locked γ ∗ R else True }}}.
   Proof.
-    iIntros (Φ) "#Hl HΦ". iDestruct "Hl" as (l) "(% & #? & % & #?)". subst.
+    iIntros (Φ) "#Hl HΦ". iDestruct "Hl" as (l) "(% & #?)". subst.
     wp_rec. iInv N as ([]) "[Hl HR]" "Hclose".
     - wp_cas_fail. iMod ("Hclose" with "[Hl]"); first (iNext; iExists true; eauto).
       iModIntro. iApply ("HΦ" $! false). done.
@@ -174,11 +174,12 @@ So, let's first checkout the spec for the lock constructor. *)
     {{{ is_lock γ lk R ∗ locked γ ∗ R }}} release lk {{{ RET #(); True }}}.
   Proof.
     iIntros (Φ) "(Hlock & Hlocked & HR) HΦ".
-    iDestruct "Hlock" as (l) "(% & #? & % & #?)". subst.
+    iDestruct "Hlock" as (l) "(% & #?)". subst.
     rewrite /release /=. wp_let. iInv N as (b) "[Hl _]" "Hclose".
     wp_store. iApply "HΦ". iApply "Hclose". iNext. iExists false. by iFrame.
   Qed.
 End proof.
 
-(** Credit: This source is taken from Iris library. *)
+Global Opaque newlock try_acquire acquire release.
 
+(** Credit: This source is taken from Iris library. *)
