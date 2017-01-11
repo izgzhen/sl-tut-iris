@@ -42,9 +42,9 @@ TODO: It might be clearer to draw a graph here, but I won't bother now :P
   (* Here is the "shape" predicate *)
   Fixpoint isList (l: val) (xs: List val) : iProp Σ :=
     match xs with
-    | [] => (l = NONEV)%I
+    | [] => ⌜ l = NONEV ⌝%I
     | x :: xs => (∃ (hd: loc) (tl: val),
-                    #hd = l ∗ hd ↦ SOMEV (x, tl) ∗ isList tl xs)%I
+                    ⌜ #hd = l ⌝ ∗ hd ↦ SOMEV (x, tl) ∗ isList tl xs)%I
     end.
 
   (** This predicate, when applied with an abstract list, maps to
@@ -56,12 +56,11 @@ its physical configuration. Now we can give spec for nil and cons.  *)
   Qed.
 
   Lemma cons_spec (l: val) (x: val) (xl: List val) : ∀ Φ,
-    heap_ctx ∗
     isList l xl ∗
     (∀ l': val, isList l' (x::xl) -∗ Φ l')
     ⊢ WP cons x l {{ Φ }}.
   Proof.
-    iIntros (Φ) "(#? & Hl & HΦ)".
+    iIntros (Φ) "(Hl & HΦ)".
     rewrite /cons.
     wp_let. wp_let.
     wp_alloc l' as "Hl'".
@@ -74,9 +73,9 @@ its physical configuration. Now we can give spec for nil and cons.  *)
   
   Fixpoint isListSeg (m n: val) (xs: List val) : iProp Σ :=
     match xs with
-    | [] => (m = n)%I
+    | [] => ⌜ m = n ⌝%I
     | x :: xs => (∃ (hd: loc) (m': val),
-                     #hd = m ∗ hd ↦ SOMEV (x, m') ∗ isListSeg m' n xs)%I
+                     ⌜ #hd = m ⌝ ∗ hd ↦ SOMEV (x, m') ∗ isListSeg m' n xs)%I
     end.
 
   (** we will prove a trivial lemma first *)

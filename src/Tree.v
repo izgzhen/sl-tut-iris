@@ -12,6 +12,7 @@ From iris.program_logic Require Export weakestpre.
 From iris.heap_lang Require Export lang.
 From iris.proofmode Require Export tactics.
 From iris.heap_lang Require Import proofmode notation.
+Set Default Proog Using "Type".
 
 (** An inductive definition of binary tree with integers at leaves: *)
 Inductive tree :=
@@ -21,10 +22,10 @@ Inductive tree :=
 (** Physical representation of a tree: *)
 Fixpoint is_tree `{!heapG Σ} (v : val) (t : tree) : iProp Σ :=
   match t with
-  | leaf n => v = InjLV #n
+  | leaf n => ⌜ v = InjLV #n ⌝%I
   | node tl tr =>
      ∃ (ll lr : loc) (vl vr : val),
-       v = InjRV (#ll,#lr) ∗ ll ↦ vl ∗ is_tree vl tl ∗ lr ↦ vr ∗ is_tree vr tr
+       ⌜ v = InjRV (#ll,#lr) ⌝ ∗ ll ↦ vl ∗ is_tree vl tl ∗ lr ↦ vr ∗ is_tree vr tr
   end%I.
 
 (** "sum" property of the abstract tree: *)
@@ -50,16 +51,14 @@ Definition sum' : val := λ: "t",
   sum_loop "t" "l";;
   !"l".
 
-Global Opaque sum_loop sum'.
-
 Section proof.
-  Context `{!heapG Σ}.
-  Lemma sum_loop_wp v t l (n : Z) (Φ : val → iProp Σ) :
-    heap_ctx ∗ l ↦ #n ∗ is_tree v t
-    ∗ (l ↦ #(sum t + n) -∗ is_tree v t -∗ Φ #())
+
+  Lemma sum_loop_wp `{!heapG Σ} v t l (n : Z) (Φ : val → iProp Σ) :
+    l ↦ #n ∗ is_tree v t ∗
+    (l ↦ #(sum t + n) -∗ is_tree v t -∗ Φ #())
     ⊢ WP sum_loop v #l {{ Φ }}.
   Proof.
-    iIntros "(#Hh & Hl & Ht & HΦ)".
+    iIntros "(Hl & Ht & HΦ)".
     iLöb as "IH" forall (v t l n Φ). wp_rec. wp_let.
     (* Löb induction to solve recursion. Note how forall selects
        variables to generalize. *)
@@ -78,13 +77,13 @@ Section proof.
       iExists ll, lr, vl, vr. by iFrame.
   Qed.
 
-  Lemma sum_wp v t Φ :
-    heap_ctx ∗ is_tree v t ∗ (is_tree v t -∗ Φ #(sum t))
+  Lemma sum_wp `{!heapG Σ} v t Φ :
+    is_tree v t ∗ (is_tree v t -∗ Φ #(sum t))
     ⊢ WP sum' v {{ Φ }}.
   Proof.
-    iIntros "(#Hh & Ht & HΦ)". rewrite /sum' /=.
+    iIntros "(Ht & HΦ)". rewrite /sum' /=.
     wp_let. wp_alloc l as "Hl". wp_let.
-    wp_apply (sum_loop_wp with "[- $Hh $Ht $Hl]").
+    wp_apply (sum_loop_wp with "[HΦ Hl Ht]"); iFrame.
     rewrite Z.add_0_r.
     iIntros "Hl Ht". wp_seq. wp_load. by iApply "HΦ".
   Qed.

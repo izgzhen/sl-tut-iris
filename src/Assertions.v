@@ -95,7 +95,7 @@ it makes "reasoning in the embedded logic as seamless as reasoning in the meta l
   Qed.
 
   (** How to mix pure assertions with spatial ones ? *)
-  Example mix: ∀ y: loc, (x = y) ∗ y ↦ #1 ⊢ x ↦ #1.
+  Example mix: ∀ y: loc, ⌜x = y ⌝ ∗ y ↦ #1 ⊢ x ↦ #1.
   Proof.
     iIntros (y) "[% Hy]". (* Use % to introduce a (unfortunately anonymous) pure assertion *)
     by subst. (* Note: [by <tactic>] is equal to [<tactic>; done.] *)

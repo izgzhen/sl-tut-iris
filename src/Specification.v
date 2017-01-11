@@ -14,7 +14,7 @@ Let's prove a simple triple now.
  *)
 
   Example let_assignment:
-    {{ True%I }} (let: "x" := #1 in "x")%E {{ r, (r = #1)%I }}.
+    {{ True%I }} (let: "x" := #1 in "x")%E {{ r, ⌜ r = #1 ⌝ }}.
   Proof.
     (* Note that the expression (or program, since heap_lang is a functional
        language) is a shallow-embedding in Coq with heavy notations involved.
@@ -38,13 +38,9 @@ Let's prove a simple triple now.
   (** The above expression is pretty pure, or put it another, _side-effect free_.
       Let's check out a different one *)
   Example allocation:
-    {{ heap_ctx }} (let: "x" := ref #1 in "x")%E {{ r, ∃ l: loc, r = #l ∗ l ↦ #1 }}.
+    {{ True }} (let: "x" := ref #1 in "x")%E {{ r, ∃ l: loc, ⌜ r = #l ⌝∗ l ↦ #1 }}.
   Proof.
-    iIntros "!# #?".
-    (* [heap_ctx] means we can allocate things in the heap. It is a
-                      presistent assertions (duplicable but still spatial). So it is
-                      introduced anonymously by pattern [#?].
-                      You can also use [#HeapCtx] *)
+    iIntros "!# _".
     
     wp_bind (ref _)%E. (* Focus on the expression to evaluate *)
     wp_alloc l as "Hl". (* allocate [ref #1] as in a cell pointed by [l] *)
@@ -81,10 +77,10 @@ Let's prove a simple triple now.
 
   Lemma add_one_spec:
     ∀ (x: loc) (n: Z) (Φ: val → iProp Σ),
-      heap_ctx ∗ x ↦ #n ∗ (x ↦ #(n + 1) -∗ Φ #())
+      x ↦ #n ∗ (x ↦ #(n + 1) -∗ Φ #())
       ⊢ WP add_one #x {{ Φ }}.
   Proof.
-    iIntros (x n Φ) "(#? & Hx & HΦ)".
+    iIntros (x n Φ) "(Hx & HΦ)".
     rewrite /add_one.
     wp_let. wp_load.
     wp_op. wp_store.
@@ -99,11 +95,10 @@ current context in the client side, and the productions before the
 wand will be introduced to the new context *)
 
   Lemma add_one_client: ∀ (x y: loc),
-      heap_ctx ∗
       x ↦ #1 ∗ y ↦ #2
       ⊢ WP add_one #x;; add_one #y {{ _, x ↦ #2 ∗ y ↦ #3 }}.
   Proof.
-    iIntros (x y) "(#? & Hx & Hy)".
+    iIntros (x y) "(Hx & Hy)".
     wp_bind (add_one _).
     iApply add_one_spec.
     iFrame "#". (* Frame out the persistent context. *)
@@ -120,4 +115,6 @@ wand will be introduced to the new context *)
   (** You can observe how the specification _generally_ fit
       in any specific client context *)
 
+  (* TODO: Add one section about Texan triple *)
+  
 End spec.
